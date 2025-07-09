@@ -14,7 +14,7 @@ from browser_setup import RealBrowser
 from selenium.webdriver.common.action_chains import ActionChains
 import json
 # ?is_from_webapp=1
-class TikTokVideoDetailScraper:
+class TikTokVideoRelatedScraper:
     def __init__(self, base_dir="raw_data/tiktok", output_file="video_info_details.csv"):
         self.output_file = output_file
         self.base_dir = base_dir
@@ -111,5 +111,5 @@ class TikTokVideoDetailScraper:
         finally:
             driver.quit()
 if __name__ == "__main__":
-    scraper = TikTokVideoDetailScraper()
+    scraper = TikTokVideoRelatedScraper()
     scraper.scrape_related_videos('https://www.tiktok.com/@sau.drama/video/7522016067275820309')
