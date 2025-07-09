@@ -10,10 +10,10 @@ class RealBrowser:
 
     def setup_browser(self):
         options = uc.ChromeOptions()
-        # options.add_argument('--headless')
+        options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--disable-gpu')
+        # options.add_argument('--disable-gpu')
         options.add_argument('--disable-extensions')
         options.add_argument('--disable-web-security')
         options.add_argument('--allow-running-insecure-content')
@@ -23,11 +23,20 @@ class RealBrowser:
 
         self.driver = uc.Chrome(options=options)
         return self.driver
-        
+
+    def open_new_tab(self, url="about:blank"):
+        if self.driver:
+            self.driver.execute_script(f"window.open('{url}', '_blank');")
+
     def quit_browser(self):
         if self.driver:
             self.driver.quit()
 
 
+# Example usage:
 # if __name__ == "__main__":
-#     RealBrowser().setup_browser().get("https://www.tiktok.com/explore")
+#     browser = RealBrowser()
+#     driver = browser.setup_browser()
+#     driver.get("https://www.tiktok.com/explore")
+#     browser.open_new_tab("https://www.google.com")
+#     browser.quit_browser()
