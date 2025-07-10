@@ -194,7 +194,8 @@ class TikTokVideoDetailScraper:
                 comment["video_url"] = video_url
 
             # Save comments to a CSV file
-            comments_file_path = os.path.join(self.base_dir, f"comments/{video_url.split('/')[-1]}.csv")
+            comments_file_path = os.path.join(self.base_dir, 'comments', f"{video_url.split('/')[-1]}.csv")
+            os.makedirs(os.path.dirname(comments_file_path), exist_ok=True)
             comments_df = pd.DataFrame(comments)
             comments_df.to_csv(comments_file_path, index=False, encoding="utf-8")
             print(f"Extracted {len(comments)} comments and saved to {comments_file_path}")

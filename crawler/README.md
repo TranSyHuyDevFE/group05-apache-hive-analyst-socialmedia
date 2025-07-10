@@ -26,3 +26,9 @@
 # TODO:
 - [ ] Group excel data by date
 - [ ] Create job to run every day.
+
+
+# Start: 
+```
+supervisord -c supervisord.conf 
+```
