@@ -56,9 +56,35 @@ services:
     networks:
       - hive
 
+  superset:
+    image: apache/superset:latest
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    container_name: superset
+    hostname: superset
+    environment:
+      SUPERSET_SECRET_KEY: 'your-secret-key-here'
+      DATABASE_URL: 'postgresql://hive:password@postgres:5432/metastore_db'
+      SUPERSET_LOAD_EXAMPLES: 'yes'
+    ports:
+      - '8088:8088'
+    volumes:
+      - superset-data:/app/superset_home
+    networks:
+      - hive
+    command: >
+      bash -c "
+      superset db upgrade &&
+      superset fab create-admin --username admin --firstname Admin --lastname User --email admin@example.com --password admin &&
+      superset init &&
+      superset run -h 0.0.0.0 -p 8088
+      "
+
 volumes:
   hive-db:
   warehouse:
+  superset-data:
 
 networks:
   hive:
