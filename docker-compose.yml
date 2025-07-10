@@ -12,7 +12,7 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - hive-db:/var/lib/postgresql
+      - ./volumes/hive_db:/var/lib/postgresql/data
     networks:
       - hive
 
@@ -33,7 +33,8 @@ services:
     ports:
         - '9083:9083'
     volumes:
-        - warehouse:/opt/hive/data/warehouse
+        - ./volumes/warehouse:/opt/hive/data/warehouse
+        - ./lib/postgresql.jar:/opt/hive/lib/postgresql.jar
     networks:
       - hive
 
@@ -46,13 +47,14 @@ services:
     environment:
       HIVE_SERVER2_THRIFT_PORT: 10000
       SERVICE_OPTS: '-Xmx1G -Dhive.metastore.uris=thrift://metastore:9083'
-      IS_RESUME: 'true'
       SERVICE_NAME: 'hiveserver2'
+      IS_RESUME: "true"
     ports:
       - '10000:10000'
       - '10002:10002'
     volumes:
-      - warehouse:/opt/hive/data/warehouse
+      - ./volumes/warehouse:/opt/hive/data/warehouse
+      - ./lib/postgresql.jar:/opt/hive/lib/postgresql.jar
     networks:
       - hive
 
@@ -65,27 +67,24 @@ services:
     hostname: superset
     environment:
       SUPERSET_SECRET_KEY: 'your-secret-key-here'
-      DATABASE_URL: 'postgresql://hive:password@postgres:5432/metastore_db'
+      # DATABASE_URL: 'postgresql://hive:password@postgres:5432/metastore_db'
       SUPERSET_LOAD_EXAMPLES: 'yes'
     ports:
       - '8088:8088'
-    volumes:
-      - superset-data:/app/superset_home
+    # volumes:
+    #   - ./volumes/superset-data:/app/superset_home
     networks:
       - hive
     command: >
       bash -c "
       superset db upgrade &&
+      pip install pyhive thrift sqlalchemy PyHive thrift_sasl &&
       superset fab create-admin --username admin --firstname Admin --lastname User --email admin@example.com --password admin &&
       superset init &&
       superset run -h 0.0.0.0 -p 8088
       "
 
-volumes:
-  hive-db:
-  warehouse:
-  superset-data:
-
 networks:
   hive:
     name: hive
+    driver: bridge
