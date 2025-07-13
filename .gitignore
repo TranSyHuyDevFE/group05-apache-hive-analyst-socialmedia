@@ -1,2 +1,3 @@
 /crawler/browser_profile/*
 /volumes/*
+/hadoop_cluster/volumes/*

@@ -1,0 +1,5 @@
+hdfs
+pandas
+pyhive 
+thrift
+thrift_sasl
