@@ -69,7 +69,10 @@ class TikTokVideoScraper:
         os.makedirs(self.base_dir, exist_ok=True)
         file_path = os.path.join(self.base_dir, self.output_file)
         df = pd.DataFrame(self.all_video_info)
-        df.to_csv(file_path, index=False)
+        if os.path.exists(file_path):
+            df.to_csv(file_path, mode='a', header=False, index=False)
+        else:
+            df.to_csv(file_path, index=False)
         print(f"Saved {len(self.all_video_info)} videos to {file_path}")
 
     def get_categories(self, driver):
@@ -369,6 +372,76 @@ class TikTokVideoScraper:
                     if not new_video_urls.difference(self.seen_items):
                         print("No new items loaded. Reached the end of the page.")
                         break
+        finally:
+            driver.quit()
+    def scrape_videos_by_one_category(self, category: dict
+                                      , output_callback=None, max_crawled_items = 2000):
+        """Original single-tab scraping method (kept for backward compatibility)"""
+        url = "https://www.tiktok.com/explore"
+        driver = self.setup_browser()
+        try:
+            driver.get(url)
+            print(f"Switching to category: {category['display']}")
+            driver.execute_script("window.scrollTo(0, 0);")
+            time.sleep(5)
+            retry_count = 0
+            max_retries = 4
+            while retry_count < max_retries:
+                try:
+                    category_button = driver.find_element(By.XPATH, f"//span[text()='{category['display']}']")
+                    category_button.click()
+                    break
+                except Exception as e:
+                    retry_count += 1
+                    print(f"Retry {retry_count}/{max_retries} for category '{category['display']}': {e}")
+                    try:
+                        arrow_icon = driver.find_element(By.CSS_SELECTOR, "div.css-1pi6qhe-DivArrowIconContainer e13i6o2411")
+                        arrow_icon.click()
+                    except Exception as arrow_error:
+                        print(f"Failed to click arrow icon: {arrow_error}")
+                    time.sleep(2)
+            else:
+                print(f"Failed to select category '{category['display']}' after {max_retries} retries.")
+            time.sleep(2)
+            _max_crawlled_items = 0
+
+            while True:
+                WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-e2e='explore-item']"))
+                )
+                time.sleep(2)
+
+                explore_items = self.get_explore_items(driver)
+                if not explore_items:
+                    print("Explore items not found.")
+                    break
+
+                for item in explore_items:
+                    video_data = self.extract_video_data(item)
+                    if video_data:
+                        video_data['category'] = category['category_slug']
+                        self.all_video_info.append(video_data)
+                        if output_callback:
+                            output_callback(video_data)
+
+                self.save_video_info()
+
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                time.sleep(2)
+
+                new_explore_items = self.get_explore_items(driver)
+                new_video_urls = {
+                    item.find("a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)['href']
+                    for item in new_explore_items if item.find("a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)
+                }
+
+                if not new_video_urls.difference(self.seen_items):
+                    print("No new items loaded. Reached the end of the page.")
+                    break
+                _max_crawlled_items += len(new_video_urls)
+                if _max_crawlled_items >= max_crawled_items:
+                    print(f"Reached max crawl limit of {_max_crawlled_items} items.")
+                    break
         finally:
             driver.quit()
 

@@ -25,9 +25,12 @@ class TikTokVideoDetailScraper:
         browser = RealBrowser()
         return browser.setup_browser()
 
-    def save_video_info(self, video_info):
+    def save_video_info(self, video_info, video_url):
         os.makedirs(self.base_dir, exist_ok=True)
         file_path = os.path.join(self.base_dir, self.output_file)
+
+        # Add video_url to the video_info dictionary
+        video_info["video_url"] = video_url
 
         # Check if the file exists
         if os.path.exists(file_path):
@@ -79,7 +82,6 @@ class TikTokVideoDetailScraper:
             "likes": action_bar_container.find("strong", attrs={"data-e2e": "like-count"}).get_text(strip=True) if action_bar_container.find("strong", attrs={"data-e2e": "like-count"}) else None,
             "comments": action_bar_container.find("strong", attrs={"data-e2e": "comment-count"}).get_text(strip=True) if action_bar_container.find("strong", attrs={"data-e2e": "comment-count"}) else None,
             "shares": action_bar_container.find("strong", attrs={"data-e2e": "share-count"}).get_text(strip=True) if action_bar_container.find("strong", attrs={"data-e2e": "share-count"}) else None,
-            "video_link": soup.find("p", attrs={"data-e2e": "browse-video-link"}).get_text(strip=True) if soup.find("p", attrs={"data-e2e": "browse-video-link"}) else None
         }
 
         return {
@@ -172,33 +174,34 @@ class TikTokVideoDetailScraper:
         comments = self.extract_comments(driver)
         return comments
 
-    def scrape_detail_page(self, video_url):
-        driver = self.setup_browser()
+    def scrape_detail_page(self, driver, video_url):
+        if not driver:
+            driver = self.setup_browser()
         try:
             video_info = self.extract_detail_page_info(driver, video_url)
-            self.save_video_info(video_info)
-            time.sleep(2)  # Allow time for the page to load
+            self.save_video_info(video_info, video_url)
+            # time.sleep(2)  # Allow time for the page to load
 
-            # Scroll to load all comments
-            self.scroll_to_bottom(driver)
-            time.sleep(2)  # Allow time for the page to load
+            # # Scroll to load all comments
+            # self.scroll_to_bottom(driver)
+            # time.sleep(2)  # Allow time for the page to load
 
-            # Expand all replies
-            self.expand_all_replies(driver)
-            time.sleep(2)  # Allow time for the page to load
-            # Extract comments and replies
-            comments = self.extract_comments(driver)
+            # # Expand all replies
+            # self.expand_all_replies(driver)
+            # time.sleep(2)  # Allow time for the page to load
+            # # Extract comments and replies
+            # comments = self.extract_comments(driver)
 
-            # Add video_url to each comment
-            for comment in comments:
-                comment["video_url"] = video_url
+            # # Add video_url to each comment
+            # for comment in comments:
+            #     comment["video_url"] = video_url
 
-            # Save comments to a CSV file
-            comments_file_path = os.path.join(self.base_dir, 'comments', f"{video_url.split('/')[-1]}.csv")
-            os.makedirs(os.path.dirname(comments_file_path), exist_ok=True)
-            comments_df = pd.DataFrame(comments)
-            comments_df.to_csv(comments_file_path, index=False, encoding="utf-8")
-            print(f"Extracted {len(comments)} comments and saved to {comments_file_path}")
+            # # Save comments to a CSV file
+            # comments_file_path = os.path.join(self.base_dir, 'comments', f"{video_url.split('/')[-1]}.csv")
+            # os.makedirs(os.path.dirname(comments_file_path), exist_ok=True)
+            # comments_df = pd.DataFrame(comments)
+            # comments_df.to_csv(comments_file_path, index=False, encoding="utf-8")
+            # print(f"Extracted {len(comments)} comments and saved to {comments_file_path}")
         except Exception as e:
             print(f"Error scraping detail page: {e}")
         finally:

@@ -19,7 +19,7 @@ class RealBrowser:
         options.add_argument('--allow-running-insecure-content')
         options.add_argument('--disable-features=VizDisplayCompositor')
         # Persist all browser data in self.profile_dir
-        options.add_argument(f'--user-data-dir={self.profile_dir}')
+        # options.add_argument(f'--user-data-dir={self.profile_dir}')
 
         self.driver = uc.Chrome(options=options)
         return self.driver
