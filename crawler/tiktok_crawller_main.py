@@ -1,7 +1,8 @@
 # This file to handle TikTok crawling process"
 from calendar import c
 from tiktok_video_related import TikTokVideoRelatedScraper
-from tiktok_video_details import TikTokUserInfoScraper, TikTokVideoDetailScraper
+from tiktok_video_details import TikTokVideoDetailScraper
+from tiktok_user_info import TikTokUserInfoScraper
 from tiktok_trend_videos  import TikTokVideoScraper
 from datetime import datetime
 import os
