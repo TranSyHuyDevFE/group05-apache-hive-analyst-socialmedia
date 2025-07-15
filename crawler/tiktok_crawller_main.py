@@ -4,7 +4,7 @@ from tiktok_video_related import TikTokVideoRelatedScraper
 from tiktok_video_details import TikTokVideoDetailScraper
 from tiktok_user_info import TikTokUserInfoScraper
 from tiktok_trend_videos  import TikTokVideoScraper
-from datetime import datetime
+from datetime import datetime, time
 import os
 import pytz
 import json
@@ -12,6 +12,8 @@ import pandas as pd
 from enum import Enum
 from compressor import CrawledDataCompressor
 from sync_data_to_git   import run_sync_script
+
+from scheduler import HourlyScheduler
 class TikTokCrawlerIO:
     @staticmethod
     def build_folder(base_dir='raw_data/tiktok'):
@@ -212,7 +214,17 @@ class TikTokCrawlerMain:
         self.compressor.compress_all_folders()     
         run_sync_script()  
                 
-                    
-if __name__ == "__main__":
+def my_task():
     crawler = TikTokCrawlerMain()
     crawler.run()
+    print(f"Task executed at {time.ctime()}")            
+      
+if __name__ == "__main__":
+    scheduler = HourlyScheduler(my_task)
+    scheduler.start()
+    try:
+        while True:
+            time.sleep(1) 
+    except KeyboardInterrupt:
+        scheduler.stop()
+    
