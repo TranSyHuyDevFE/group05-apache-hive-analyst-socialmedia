@@ -4,7 +4,7 @@ from tiktok_video_related import TikTokVideoRelatedScraper
 from tiktok_video_details import TikTokVideoDetailScraper
 from tiktok_user_info import TikTokUserInfoScraper
 from tiktok_trend_videos  import TikTokVideoScraper
-from datetime import datetime, time
+from datetime import datetime
 import os
 import pytz
 import json
@@ -12,6 +12,7 @@ import pandas as pd
 from enum import Enum
 from compressor import CrawledDataCompressor
 from sync_data_to_git   import run_sync_script
+import time
 
 from scheduler import HourlyScheduler
 class TikTokCrawlerIO:

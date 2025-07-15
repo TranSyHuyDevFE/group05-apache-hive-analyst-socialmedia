@@ -5,7 +5,9 @@ class HourlyScheduler:
     def __init__(self, func):
         self.func = func
         self._timer = None
-        self._running = False
+        self._running = True
+        self.func()  # Run immediately on init
+        self._schedule_next()
 
     def _run(self):
         if self._running:
@@ -18,16 +20,12 @@ class HourlyScheduler:
         self._timer.start()
 
     def start(self):
-        if not self._running:
-            self._running = True
-            self._schedule_next()
-            print("Hourly scheduler started.")
+        # ...existing code...
+        print("Hourly scheduler started.")
 
     def stop(self):
-        self._running = False
-        if self._timer:
-            self._timer.cancel()
-            print("Hourly scheduler stopped.")
+        # ...existing code...
+        print("Hourly scheduler stopped.")
 
 # Example usage
 def my_task():
@@ -35,10 +33,12 @@ def my_task():
 
 if __name__ == "__main__":
     scheduler = HourlyScheduler(my_task)
-    scheduler.start()
-
+    # No need to call start(), already started in __init__
     try:
         while True:
             time.sleep(1)  # Keeps the main thread alive
+    except KeyboardInterrupt:
+        scheduler.stop()
+        time.sleep(1)  # Keeps the main thread alive
     except KeyboardInterrupt:
         scheduler.stop()
