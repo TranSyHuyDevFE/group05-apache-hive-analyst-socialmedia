@@ -258,6 +258,10 @@ class TikTokVideoDetailScraper:
                     # Extract video description and hashtags
                     description_container = soup.find("div", class_=lambda x: x and "DivDescriptionContentContainer" in x)
                     description = description_container.find("span", attrs={"data-e2e": "new-desc-span"}).get_text(strip=True) if description_container else None
+                    if description and "#" in description:
+                        hashtags = [word for word in description.split() if word.startswith("#")]
+                    else:
+                        hashtags = []
                     hashtags = [
                         tag.get_text(strip=True) for tag in description_container.find_all("a", attrs={"data-e2e": "search-common-link"})
                     ] if description_container else []
