@@ -215,17 +215,12 @@ class TikTokCrawlerMain:
         self.compressor.compress_all_folders()     
         run_sync_script()  
                 
-def my_task():
-    crawler = TikTokCrawlerMain()
-    crawler.run()
-    print(f"Task executed at {time.ctime()}")            
+# def my_task():
+#     crawler = TikTokCrawlerMain()
+#     crawler.run()
+#     print(f"Task executed at {time.ctime()}")            
       
 if __name__ == "__main__":
-    scheduler = HourlyScheduler(my_task)
-    scheduler.start()
-    try:
-        while True:
-            time.sleep(1) 
-    except KeyboardInterrupt:
-        scheduler.stop()
+    crawler = TikTokCrawlerMain()
+    crawler.run()
     
