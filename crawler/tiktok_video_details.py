@@ -184,10 +184,10 @@ class TikTokVideoDetailScraper:
         time.sleep(2)
         
         # Try to find comments with retry logic
-        max_retries = 3
+        max_retries = 1
         for attempt in range(max_retries):
             try:
-                WebDriverWait(driver, 10).until(
+                WebDriverWait(driver, 2).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, "[data-e2e='comment-level-1']"))
                 )
                 break

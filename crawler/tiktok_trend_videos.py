@@ -379,6 +379,7 @@ class TikTokVideoScraper:
         """Original single-tab scraping method (kept for backward compatibility)"""
         url = "https://www.tiktok.com/explore"
         driver = self.setup_browser()
+        self.all_video_info = []
         try:
             driver.get(url)
             print(f"Switching to category: {category['display']}")
@@ -388,6 +389,23 @@ class TikTokVideoScraper:
             max_retries = 4
             while retry_count < max_retries:
                 try:
+                    try:
+                        driver.execute_script("""
+                            var captchaElement = document.getElementById('captcha-verify-container-main-page');
+                            if (captchaElement) {
+                                captchaElement.remove();
+                                console.log('Captcha container removed');
+                            }
+                            
+                            var modalOverlays = document.querySelectorAll('.TUXModal-overlay');
+                            modalOverlays.forEach(function(overlay) {
+                                overlay.remove();
+                                console.log('TUXModal-overlay removed');
+                            });
+                        """)
+                    except Exception as e:
+                        print(f"Error removing captcha container or modal overlays: {e}")
+                    
                     category_button = driver.find_element(By.XPATH, f"//span[text()='{category['display']}']")
                     category_button.click()
                     break

@@ -10,7 +10,8 @@ import pytz
 import json
 import pandas as pd
 from enum import Enum
-
+from compressor import CrawledDataCompressor
+from sync_data_to_git   import run_sync_script
 class TikTokCrawlerIO:
     @staticmethod
     def build_folder(base_dir='raw_data/tiktok'):
@@ -65,6 +66,8 @@ class ProcessStatus(Enum):
     CRAWLED_LIST_VIDEO = 'crawled_list_video'
     CRAWLING_DETAILS_VIDEO = 'crawling_details_video'
     CRAWLED_DETAILS_VIDEO = 'crawled_details_video'
+    CRAWLING_USER_INFO = 'crawling_user_info'
+    CRAWLED_USER_INFO = 'crawled_user_info'
     CRAWLING_RELATED_VIDEO = 'crawling_related_video'
     FINISH = 'finish'
     
@@ -150,6 +153,8 @@ class TikTokCrawlerMain:
             base_dir=self.folder,   
             output_file="user_info.csv"
         )
+        self.compressor = CrawledDataCompressor()
+        
    
     def load_trend_videos_crawled_by_category(self, category_slug):
         """
@@ -171,39 +176,41 @@ class TikTokCrawlerMain:
         crawl_config = self.io.load_config_from_directory(target_conf_path)
 
         # Start the crawling process for each category
-        category_not_started = crawl_config.get_category_by_status(ProcessStatus.NOT_STARTED)
-        if category_not_started:
-            for category in category_not_started:
-                crawl_config.update_status(category['category_slug'], ProcessStatus.CRAWLING_LIST_VIDEO)
-                self.trend_scraper.scrape_videos_by_one_category(category, max_crawled_items=10)
-                crawl_config.update_status(category['category_slug'], ProcessStatus.CRAWLED_LIST_VIDEO)
+        # category_not_started = crawl_config.get_category_by_status(ProcessStatus.NOT_STARTED)
+        # if category_not_started:
+        #     for category in category_not_started:
+        #         crawl_config.update_status(category['category_slug'], ProcessStatus.CRAWLING_LIST_VIDEO)
+        #         self.trend_scraper.scrape_videos_by_one_category(category, max_crawled_items=10)
+        #         crawl_config.update_status(category['category_slug'], ProcessStatus.CRAWLED_LIST_VIDEO)
 
-        print(
-            f"Finished crawling. Total categories processed: {len(crawl_config.to_list())}"
-        )            
+        # print(
+        #     f"Finished crawling. Total categories processed: {len(crawl_config.to_list())}"
+        # )            
         
-        # Optimize performnace it take about 10 - 15 seoncd for one vid -> 700vid -> 7000s = 2 hours
-        category_crawled_video_list = crawl_config.get_category_by_status(ProcessStatus.CRAWLED_LIST_VIDEO)
-        if category_crawled_video_list:
-            for category in category_crawled_video_list:
-                crawl_config.update_status(['category_slug'], ProcessStatus.CRAWLING_DETAILS_VIDEO)
-                # TODO: Optimize this process by using multiprocessing or threading
-                video_urls = [video['url'] for video in self.load_trend_videos_crawled_by_category(category['category_slug'])]
-                # Split video_urls into chunks of 10 or fewer items
-                chunks = [video_urls[i:i + 2] for i in range(0, len(video_urls), 2)]
-                for chunk in chunks:
-                    self.detail_scraper.scrape_multiple_videos(chunk)
-
-                    usernames = []
-                    for video_url in chunk:
-                        username = video_url.split('/')[3].replace('@', '')
-                        print(f"Extracted username: {username}")
-                        usernames.append(username)
-                    
-                    # Call scrape_multiple_users with the collected usernames
-                    self.user_info_scraper.scrape_multiple_users(usernames)
-                crawl_config.update_status(['category_slug'], ProcessStatus.CRAWLED_DETAILS_VIDEO)
+        # # Optimize performnace it take about 10 - 15 seoncd for one vid -> 700vid -> 7000s = 2 hours
+        # category_crawled_video_list = crawl_config.get_category_by_status(ProcessStatus.CRAWLED_LIST_VIDEO)
+        # if category_crawled_video_list:
+        #     for category in category_crawled_video_list:
+        #         crawl_config.update_status(['category_slug'], ProcessStatus.CRAWLING_DETAILS_VIDEO)
+        #         video_urls = [video['url'] for video in self.load_trend_videos_crawled_by_category(category['category_slug'])]
                 
+        #         # Split video_urls into chunks of 20 or fewer items
+        #         crawl_config.update_status(['category_slug'], ProcessStatus.CRAWLED_USER_INFO)
+        #         user_url_crawler_chunks = [video_urls[i:i + 20] for i in range(0, len(video_urls), 20)]
+        #         for chunk in user_url_crawler_chunks:
+        #             usernames = [url.split('/')[3].replace('@', '') for url in chunk]
+        #             self.user_info_scraper.scrape_multiple_users(usernames)
+        #         crawl_config.update_status(['category_slug'], ProcessStatus.CRAWLED_USER_INFO)
+                    
+        #         # Split video_urls into chunks of 10 or fewer items
+        #         chunks = [video_urls[i:i + 1] for i in range(0, len(video_urls), 1)]
+        #         for chunk in chunks:
+        #             self.detail_scraper.scrape_multiple_videos(chunk)
+
+        #         crawl_config.update_status(['category_slug'], ProcessStatus.CRAWLED_DETAILS_VIDEO)
+         
+        self.compressor.compress_all_folders()     
+        run_sync_script()  
                 
                     
 if __name__ == "__main__":
