@@ -1,28 +1,5 @@
 import os
-import shutil
-import subprocess
 import undetected_chromedriver as uc
-
-def ensure_chrome_installed():
-    """Ensure Google Chrome is installed, install if missing."""
-    chrome_path = shutil.which("google-chrome") or shutil.which("chrome")
-    if not chrome_path:
-        print("Google Chrome not found. Installing...")
-        try:
-            subprocess.run(["apt", "update"], check=True)
-            subprocess.run(["apt", "install", "-y", "google-chrome-stable"], check=True)
-        except subprocess.CalledProcessError:
-            print("google-chrome-stable not found in apt repositories. Downloading .deb from Google...")
-            subprocess.run([
-                "wget", "-O", "/tmp/google-chrome.deb",
-                "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
-            ], check=True)
-            subprocess.run([
-                "apt", "install", "-y", "/tmp/google-chrome.deb"
-            ], check=True)
-        chrome_path = shutil.which("google-chrome") or shutil.which("chrome")
-        if not chrome_path:
-            raise RuntimeError("Failed to install Google Chrome.")
 
 class RealBrowser:
     def __init__(self, profile_dir="./browser_profile"):
@@ -32,7 +9,6 @@ class RealBrowser:
         os.makedirs(self.profile_dir, exist_ok=True)
 
     def setup_browser(self):
-        ensure_chrome_installed()  # <-- Add this line
         options = uc.ChromeOptions()
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
