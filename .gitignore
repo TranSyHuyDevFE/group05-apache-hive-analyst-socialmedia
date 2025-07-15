@@ -104,5 +104,4 @@ venv.bak/
 dmypy.json
 
 
-
-/raw_data/tiktok/*
+/crawler/raw_data/tiktok/*
