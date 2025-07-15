@@ -126,6 +126,7 @@ Target
 - Process: crawl details video by category then update status to crawling_details_video 
 - Process: crawl related video by category then update status to crawling_related_video
 - after all step update status to finish
+- build docker image then setup to server schedule every hour cralled videos then update to drive.
 '''
 class TikTokCrawlerMain:
     def __init__(self): 
@@ -180,8 +181,12 @@ class TikTokCrawlerMain:
         if category_crawled_video_list:
             for category in category_crawled_video_list:
                 crawl_config.update_status(['category_slug'], ProcessStatus.CRAWLING_DETAILS_VIDEO)
-                for video in self.load_trend_videos_crawled_by_category(category['category_slug']):
-                    self.detail_scraper.scrape_detail_page(video['url'])
+                # TODO: Optimize this process by using multiprocessing or threading
+                video_urls = [video['url'] for video in self.load_trend_videos_crawled_by_category(category['category_slug'])]
+                # Split video_urls into chunks of 10 or fewer items
+                chunks = [video_urls[i:i + 10] for i in range(0, len(video_urls), 10)]
+                for chunk in chunks:
+                    self.detail_scraper.scrape_multiple_videos(chunk)
                 crawl_config.update_status(['category_slug'], ProcessStatus.CRAWLED_DETAILS_VIDEO)
                     
 if __name__ == "__main__":
