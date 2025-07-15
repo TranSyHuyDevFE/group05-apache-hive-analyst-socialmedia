@@ -6,3 +6,5 @@ services:
       dockerfile: Dockerfile
     container_name: crawler
     tty: true
+    volumes:
+      - ./raw_data:/app/raw_data
