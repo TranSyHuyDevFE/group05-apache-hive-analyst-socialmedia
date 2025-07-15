@@ -8,12 +8,18 @@ def ensure_chrome_installed():
     chrome_path = shutil.which("google-chrome") or shutil.which("chrome")
     if not chrome_path:
         print("Google Chrome not found. Installing...")
-        subprocess.run(
-            ["apt", "update"], check=True
-        )
-        subprocess.run(
-            ["apt", "install", "-y", "google-chrome-stable"], check=True
-        )
+        try:
+            subprocess.run(["apt", "update"], check=True)
+            subprocess.run(["apt", "install", "-y", "google-chrome-stable"], check=True)
+        except subprocess.CalledProcessError:
+            print("google-chrome-stable not found in apt repositories. Downloading .deb from Google...")
+            subprocess.run([
+                "wget", "-O", "/tmp/google-chrome.deb",
+                "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
+            ], check=True)
+            subprocess.run([
+                "apt", "install", "-y", "/tmp/google-chrome.deb"
+            ], check=True)
         chrome_path = shutil.which("google-chrome") or shutil.which("chrome")
         if not chrome_path:
             raise RuntimeError("Failed to install Google Chrome.")
