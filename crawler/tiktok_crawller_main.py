@@ -1,7 +1,7 @@
 # This file to handle TikTok crawling process"
 from calendar import c
 from tiktok_video_related import TikTokVideoRelatedScraper
-from tiktok_video_details import TikTokVideoDetailScraper
+from tiktok_video_details import TikTokUserInfoScraper, TikTokVideoDetailScraper
 from tiktok_trend_videos  import TikTokVideoScraper
 from datetime import datetime
 import os
@@ -144,6 +144,11 @@ class TikTokCrawlerMain:
             base_dir=self.folder,
             output_file="trend_videos.csv"
         )
+        
+        self.user_info_scraper = TikTokUserInfoScraper(
+            base_dir=self.folder,   
+            output_file="user_info.csv"
+        )
    
     def load_trend_videos_crawled_by_category(self, category_slug):
         """
@@ -187,7 +192,18 @@ class TikTokCrawlerMain:
                 chunks = [video_urls[i:i + 10] for i in range(0, len(video_urls), 10)]
                 for chunk in chunks:
                     self.detail_scraper.scrape_multiple_videos(chunk)
+
+                    usernames = []
+                    for video_url in chunk:
+                        username = video_url.split('/')[3].replace('@', '')
+                        print(f"Extracted username: {username}")
+                        usernames.append(username)
+                    
+                    # Call scrape_multiple_users with the collected usernames
+                    self.user_info_scraper.scrape_multiple_users(usernames)
                 crawl_config.update_status(['category_slug'], ProcessStatus.CRAWLED_DETAILS_VIDEO)
+                
+                
                     
 if __name__ == "__main__":
     crawler = TikTokCrawlerMain()
