@@ -190,7 +190,7 @@ class TikTokCrawlerMain:
                 # TODO: Optimize this process by using multiprocessing or threading
                 video_urls = [video['url'] for video in self.load_trend_videos_crawled_by_category(category['category_slug'])]
                 # Split video_urls into chunks of 10 or fewer items
-                chunks = [video_urls[i:i + 10] for i in range(0, len(video_urls), 10)]
+                chunks = [video_urls[i:i + 2] for i in range(0, len(video_urls), 2)]
                 for chunk in chunks:
                     self.detail_scraper.scrape_multiple_videos(chunk)
 
