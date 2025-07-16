@@ -2,6 +2,7 @@
 from calendar import c
 from tiktok_video_related import TikTokVideoRelatedScraper
 from tiktok_video_details import TikTokVideoDetailScraper
+from tiktok_user_info import TikTokUserInfoScraper
 from tiktok_trend_videos  import TikTokVideoScraper
 from datetime import datetime
 import os
@@ -9,7 +10,11 @@ import pytz
 import json
 import pandas as pd
 from enum import Enum
+from compressor import CrawledDataCompressor
+from sync_data_to_git   import run_sync_script
+import time
 
+from scheduler import HourlyScheduler
 class TikTokCrawlerIO:
     @staticmethod
     def build_folder(base_dir='raw_data/tiktok'):
@@ -64,6 +69,8 @@ class ProcessStatus(Enum):
     CRAWLED_LIST_VIDEO = 'crawled_list_video'
     CRAWLING_DETAILS_VIDEO = 'crawling_details_video'
     CRAWLED_DETAILS_VIDEO = 'crawled_details_video'
+    CRAWLING_USER_INFO = 'crawling_user_info'
+    CRAWLED_USER_INFO = 'crawled_user_info'
     CRAWLING_RELATED_VIDEO = 'crawling_related_video'
     FINISH = 'finish'
     
@@ -126,6 +133,7 @@ Target
 - Process: crawl details video by category then update status to crawling_details_video 
 - Process: crawl related video by category then update status to crawling_related_video
 - after all step update status to finish
+- build docker image then setup to server schedule every hour cralled videos then update to drive.
 '''
 class TikTokCrawlerMain:
     def __init__(self): 
@@ -143,6 +151,13 @@ class TikTokCrawlerMain:
             base_dir=self.folder,
             output_file="trend_videos.csv"
         )
+        
+        self.user_info_scraper = TikTokUserInfoScraper(
+            base_dir=self.folder,   
+            output_file="user_info.csv"
+        )
+        self.compressor = CrawledDataCompressor()
+        
    
     def load_trend_videos_crawled_by_category(self, category_slug):
         """
@@ -180,10 +195,37 @@ class TikTokCrawlerMain:
         if category_crawled_video_list:
             for category in category_crawled_video_list:
                 crawl_config.update_status(['category_slug'], ProcessStatus.CRAWLING_DETAILS_VIDEO)
-                for video in self.load_trend_videos_crawled_by_category(category['category_slug']):
-                    self.detail_scraper.scrape_detail_page(video['url'])
-                crawl_config.update_status(['category_slug'], ProcessStatus.CRAWLED_DETAILS_VIDEO)
+                video_urls = [video['url'] for video in self.load_trend_videos_crawled_by_category(category['category_slug'])]
+                
+                # Split video_urls into chunks of 20 or fewer items
+                crawl_config.update_status(['category_slug'], ProcessStatus.CRAWLED_USER_INFO)
+                user_url_crawler_chunks = [video_urls[i:i + 20] for i in range(0, len(video_urls), 20)]
+                for chunk in user_url_crawler_chunks:
+                    usernames = [url.split('/')[3].replace('@', '') for url in chunk]
+                    self.user_info_scraper.scrape_multiple_users(usernames)
+                crawl_config.update_status(['category_slug'], ProcessStatus.CRAWLED_USER_INFO)
                     
-if __name__ == "__main__":
+                # Split video_urls into chunks of 10 or fewer items
+                chunks = [video_urls[i:i + 1] for i in range(0, len(video_urls), 1)]
+                for chunk in chunks:
+                    self.detail_scraper.scrape_multiple_videos(chunk)
+
+                crawl_config.update_status(['category_slug'], ProcessStatus.CRAWLED_DETAILS_VIDEO)
+         
+        self.compressor.compress_all_folders()     
+        run_sync_script()  
+                
+def my_task():
     crawler = TikTokCrawlerMain()
     crawler.run()
+    print(f"Task executed at {time.ctime()}")            
+      
+if __name__ == "__main__":
+    scheduler = HourlyScheduler(my_task)
+    scheduler.start()
+    try:
+        while True:
+            time.sleep(1) 
+    except KeyboardInterrupt:
+        scheduler.stop()
+    

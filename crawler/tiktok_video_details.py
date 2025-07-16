@@ -47,6 +47,38 @@ class TikTokVideoDetailScraper:
         # Save the combined data back to the CSV file
         combined_df.to_csv(file_path, index=False)
         print(f"Appended {len([video_info])} video(s) to {file_path}")
+    
+    def save_comments(self, comments, output_file="comments.csv"):
+        if not comments:
+            print("No comments to save")
+            return
+            
+        os.makedirs(self.base_dir, exist_ok=True)
+        file_path = os.path.join(self.base_dir, output_file)
+
+        # Check if the file exists and has content
+        if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+            try:
+                # Read existing data
+                existing_df = pd.read_csv(file_path)
+                # Convert new comments to DataFrame
+                new_df = pd.DataFrame(comments)
+                # Append new data to existing data
+                combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+            except pd.errors.EmptyDataError:
+                # Handle empty file case
+                print(f"Warning: {file_path} exists but is empty, creating new file")
+                combined_df = pd.DataFrame(comments)
+            except Exception as e:
+                print(f"Error reading existing file: {e}, creating new file")
+                combined_df = pd.DataFrame(comments)
+        else:
+            # Create a new DataFrame if file doesn't exist or is empty
+            combined_df = pd.DataFrame(comments)
+
+        # Save the combined data back to the CSV file
+        combined_df.to_csv(file_path, index=False)
+        print(f"Appended {len(comments)} comment(s) to {file_path}")
 
     def extract_detail_page_info(self, driver, video_url):
         video_url = video_url + '?is_from_webapp=1'
@@ -140,31 +172,83 @@ class TikTokVideoDetailScraper:
             print(f"Error extracting user info: {e}")
             return None
 
-    def extract_comments(self, driver):
-        """Extract all comments and replies from the page."""
+    def extract_comments(self, driver, video_url):
+        """Scroll to the bottom of the page and extract all comments and replies."""
+        # Add human-like behavior before scrolling to comments
+        time.sleep(2)
+        
+        # Simulate user interaction - scroll slowly to comments section
+        driver.execute_script("window.scrollBy(0, window.innerHeight * 0.3);")
+        time.sleep(1)
+        driver.execute_script("window.scrollBy(0, window.innerHeight * 0.5);")
+        time.sleep(2)
+        
+        # Try to find comments with retry logic
+        max_retries = 1
+        for attempt in range(max_retries):
+            try:
+                WebDriverWait(driver, 2).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "[data-e2e='comment-level-1']"))
+                )
+                break
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    print(f"Attempt {attempt + 1} failed to load comments, retrying...")
+                    # Refresh the page and try again
+                    driver.refresh()
+                    time.sleep(3)
+                    continue
+                else:
+                    print(f"Failed to load comments after {max_retries} attempts: {e}")
+                    return []
+
         soup = BeautifulSoup(driver.page_source, "html.parser")
         comments = []
         comment_containers = soup.find_all("div", class_=lambda x: x and "DivCommentObjectWrapper" in x)
+        
+        if not comment_containers:
+            print("No comment containers found")
+            return []
+            
         for container in comment_containers:
             try:
                 user_info = self.extract_user_info(container)
-                content = container.find("span", attrs={"data-e2e": "comment-level-1"}).get_text(strip=True)
-                likes = container.find("div", class_=lambda x: x and "DivLikeContainer" in x).find("span").get_text(strip=True)
-                timestamp = container.find("span", class_=lambda x: x and "TUXText--weight-normal" in x).get_text(strip=True)
+                
+                # Look for comment content with multiple selectors
+                content_element = (
+                    container.find("span", attrs={"data-e2e": "comment-level-1"}) or
+                    container.find("span", class_=lambda x: x and "SpanText" in x) or
+                    container.find("p", class_=lambda x: x and "comment" in str(x).lower())
+                )
+                content = content_element.get_text(strip=True) if content_element else "No content"
+                
+                # Extract likes with fallback
+                likes_element = container.find("div", class_=lambda x: x and "DivLikeContainer" in x)
+                likes = "0"
+                if likes_element:
+                    likes_span = likes_element.find("span")
+                    likes = likes_span.get_text(strip=True) if likes_span else "0"
+                
+                # Extract timestamp
+                timestamp_element = container.find("span", class_=lambda x: x and "TUXText--weight-normal" in x)
+                timestamp = timestamp_element.get_text(strip=True) if timestamp_element else "No timestamp"
 
                 # Extract parent comment if available
                 parent_comment = container.find("span", attrs={"data-e2e": "comment-level-0"})
                 parent_content = parent_comment.get_text(strip=True) if parent_comment else None
 
                 comments.append({
-                    "user_info": user_info,
+                    "username": user_info["username"] if user_info else "Unknown",
+                    "avatar_url": user_info["avatar_url"] if user_info else None,
                     "content": content,
                     "likes": likes,
                     "timestamp": timestamp,
-                    "parent_comment": parent_content
+                    "parent_comment": parent_content,
+                    "video_url": video_url
                 })
             except Exception as e:
                 print(f"Error extracting comment: {e}")
+                continue
         return comments
 
     def scrape_comments(self, driver):
@@ -174,38 +258,187 @@ class TikTokVideoDetailScraper:
         comments = self.extract_comments(driver)
         return comments
 
-    def scrape_detail_page(self, driver, video_url):
-        if not driver:
-            driver = self.setup_browser()
+    def scrape_detail_page_single(self, driver, video_url):
+        """Scrape a single video detail page without driver management."""
         try:
             video_info = self.extract_detail_page_info(driver, video_url)
             self.save_video_info(video_info, video_url)
-            # time.sleep(2)  # Allow time for the page to load
+            print(f"Successfully scraped: {video_url}")
+        except Exception as e:
+            print(f"Error scraping detail page {video_url}: {e}")
 
-            # # Scroll to load all comments
-            # self.scroll_to_bottom(driver)
-            # time.sleep(2)  # Allow time for the page to load
+    def scrape_multiple_videos(self, video_urls):
+        """Scrape multiple video URLs using optimized tab strategy."""
+        if not video_urls:
+            print("No video URLs provided")
+            return
+        
+        driver = self.setup_browser()
+        try:
+            # Phase 1: Open all tabs and load URLs for video details only
+            print(f"Opening {len(video_urls)} tabs for video details...")
+            tab_url_mapping = {}
+            
+            for i, video_url in enumerate(video_urls):
+                try:
+                    if i == 0:
+                        # Use the first tab
+                        driver.get(video_url + '?is_from_webapp=1')
+                    else:
+                        # Open new tab and navigate to URL
+                        driver.execute_script("window.open('');")
+                        driver.switch_to.window(driver.window_handles[-1])
+                        driver.get(video_url + '?is_from_webapp=1')
+                    
+                    # Map tab handle to video URL
+                    tab_url_mapping[driver.current_window_handle] = video_url
+                    print(f"Opened tab {i+1}/{len(video_urls)}: {video_url}")
+                    
+                except Exception as e:
+                    print(f"Error opening tab for {video_url}: {e}")
+                    continue
+            
+            # Small delay to let all pages start loading
+            time.sleep(2)
+            
+            # Phase 2: Process each tab for video details only
+            print("Processing tabs for video details...")
+            for tab_handle, video_url in tab_url_mapping.items():
+                try:
+                    # Switch to the tab
+                    driver.switch_to.window(tab_handle)
+                    
+                    # Wait for page to load completely
+                    time.sleep(1)
+                    
+                    # Remove captcha container and modal overlays if they exist
+                    try:
+                        driver.execute_script("""
+                            var captchaElement = document.getElementById('captcha-verify-container-main-page');
+                            if (captchaElement) {
+                                captchaElement.remove();
+                                console.log('Captcha container removed');
+                            }
+                            
+                            var modalOverlays = document.querySelectorAll('.TUXModal-overlay');
+                            modalOverlays.forEach(function(overlay) {
+                                overlay.remove();
+                                console.log('TUXModal-overlay removed');
+                            });
+                        """)
+                    except Exception as e:
+                        print(f"Error removing captcha container or modal overlays: {e}")
+                    
+                    # Extract video details only
+                    soup = BeautifulSoup(driver.page_source, "html.parser")
+                    
+                    # Extract author information
+                    author_container = soup.find("div", class_=lambda x: x and "DivAuthorContainer" in x)
+                    author_info = {
+                        "username": author_container.find("span", class_=lambda x: x and "SpanUniqueId" in x).get_text(strip=True) if author_container else None,
+                        "nickname": author_container.find("span", class_=lambda x: x and "SpanNickName" in x).get_text(strip=True) if author_container else None,
+                    }
 
-            # # Expand all replies
-            # self.expand_all_replies(driver)
-            # time.sleep(2)  # Allow time for the page to load
-            # # Extract comments and replies
-            # comments = self.extract_comments(driver)
+                    # Extract video description and hashtags
+                    description_container = soup.find("div", class_=lambda x: x and "DivDescriptionContentContainer" in x)
+                    description = description_container.find("span", attrs={"data-e2e": "new-desc-span"}).get_text(strip=True) if description_container else None
+                    if description and "#" in description:
+                        hashtags = [word for word in description.split() if word.startswith("#")]
+                    else:
+                        hashtags = []
+                    hashtags = [
+                        tag.get_text(strip=True) for tag in description_container.find_all("a", attrs={"data-e2e": "search-common-link"})
+                    ] if description_container else []
 
-            # # Add video_url to each comment
-            # for comment in comments:
-            #     comment["video_url"] = video_url
+                    # Extract music information
+                    music_container = soup.find("h4", attrs={"data-e2e": "browse-music"})
+                    music_info = {
+                        "title": music_container.find("div", class_=lambda x: x and "DivMusicText" in x).get_text(strip=True) if music_container else None,
+                        "link": music_container.find("a")["href"] if music_container and music_container.find("a") else None
+                    }
 
-            # # Save comments to a CSV file
-            # comments_file_path = os.path.join(self.base_dir, 'comments', f"{video_url.split('/')[-1]}.csv")
-            # os.makedirs(os.path.dirname(comments_file_path), exist_ok=True)
-            # comments_df = pd.DataFrame(comments)
-            # comments_df.to_csv(comments_file_path, index=False, encoding="utf-8")
-            # print(f"Extracted {len(comments)} comments and saved to {comments_file_path}")
+                    # Extract engagement info
+                    action_bar_container = soup.find("div", class_=lambda x: x and "DivActionBarWrapper" in x)
+                    engagement_info = {
+                        "likes": action_bar_container.find("strong", attrs={"data-e2e": "like-count"}).get_text(strip=True) if action_bar_container.find("strong", attrs={"data-e2e": "like-count"}) else None,
+                        "comments": action_bar_container.find("strong", attrs={"data-e2e": "comment-count"}).get_text(strip=True) if action_bar_container.find("strong", attrs={"data-e2e": "comment-count"}) else None,
+                        "shares": action_bar_container.find("strong", attrs={"data-e2e": "share-count"}).get_text(strip=True) if action_bar_container.find("strong", attrs={"data-e2e": "share-count"}) else None,
+                    }
+
+                    video_info = {
+                        "author": author_info,
+                        "description": description,
+                        "hashtags": hashtags,
+                        "music": music_info,
+                        "engagement": engagement_info
+                    }
+                    
+                    # Save video details
+                    self.save_video_info(video_info, video_url)
+                    print(f"Successfully processed video details: {video_url}")
+                    
+                except Exception as e:
+                    print(f"Error processing video details for {video_url}: {e}")
+                    continue
+            
+            # Phase 3: Scrape comments separately with fresh page loads
+            print("Starting comment extraction phase...")
+            time.sleep(3)  # Pause between phases
+            
+            for video_url in video_urls:
+                try:
+                    print(f"Extracting comments for: {video_url}")
+                    # Open fresh tab for comments
+                    driver.execute_script("window.open('');")
+                    driver.switch_to.window(driver.window_handles[-1])
+                    
+                    # Navigate to video with additional parameters to avoid detection
+                    comment_url = video_url + '?is_from_webapp=1&lang=en'
+                    driver.get(comment_url)
+                    
+                    # Wait and simulate human behavior
+                    time.sleep(3)
+                    
+                    # Extract comments with retry logic
+                    comments = self.extract_comments(driver, video_url)
+                    
+                    if comments:
+                        self.save_comments(comments)
+                        print(f"Successfully extracted {len(comments)} comments from {video_url}")
+                    else:
+                        print(f"No comments found for {video_url}")
+                    
+                    # Close the comment tab
+                    driver.close()
+                    driver.switch_to.window(driver.window_handles[0])
+                    
+                    # Add delay between videos to avoid spam detection
+                    time.sleep(2)
+                    
+                except Exception as e:
+                    print(f"Error extracting comments for {video_url}: {e}")
+                    # Try to close tab if it's still open
+                    try:
+                        if len(driver.window_handles) > 1:
+                            driver.close()
+                            driver.switch_to.window(driver.window_handles[0])
+                    except:
+                        pass
+                    continue
+                    
+        except Exception as e:
+            print(f"Error in scrape_multiple_videos: {e}")
+        finally:
+            driver.quit()
+            print(f"Completed scraping {len(video_urls)} videos")
+
+    def scrape_detail_page(self, driver, video_url):
+        """Original method - now handles single video with driver management for backward compatibility."""
+        if not driver:
+            driver = self.setup_browser()
+        try:
+            self.scrape_detail_page_single(driver, video_url)
         except Exception as e:
             print(f"Error scraping detail page: {e}")
         finally:
             driver.quit()
-if __name__ == "__main__":
-    scraper = TikTokVideoDetailScraper()
-    scraper.scrape_detail_page('https://www.tiktok.com/@sau.drama/video/7522016067275820309')
