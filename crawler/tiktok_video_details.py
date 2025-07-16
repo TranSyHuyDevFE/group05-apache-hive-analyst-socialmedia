@@ -339,6 +339,10 @@ class TikTokVideoDetailScraper:
                         "nickname": author_container.find("span", class_=lambda x: x and "SpanNickName" in x).get_text(strip=True) if author_container else None,
                     }
 
+                    # Extract time posted
+                    time_posted_container = soup.find("span", attrs={"data-e2e": "browser-nickname"})
+                    time_posted = time_posted_container.find_all("span")[-1].get_text(strip=True) if time_posted_container else None
+
                     # Extract video description and hashtags
                     description_container = soup.find("div", class_=lambda x: x and "DivDescriptionContentContainer" in x)
                     description = description_container.find("span", attrs={"data-e2e": "new-desc-span"}).get_text(strip=True) if description_container else None
@@ -367,11 +371,13 @@ class TikTokVideoDetailScraper:
 
                     video_info = {
                         "author": author_info,
+                        "time_published": time_posted,
                         "description": description,
                         "hashtags": hashtags,
                         "music": music_info,
                         "engagement": engagement_info
                     }
+                    
                     
                     # Save video details
                     self.save_video_info(video_info, video_url)
