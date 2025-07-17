@@ -2,7 +2,7 @@
 set -e
 
 # Step 1: Create folders in warehouse for each table
-target_dir="volumes/warehouse"
+target_dir="volumes/warehouse/tiktok"
 declare -A tbls=(
   [category]=category.csv
   [comments]=comments.csv
