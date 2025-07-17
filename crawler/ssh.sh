@@ -1,7 +1,7 @@
 #!/bin/bash
 # Usage: ./ssh.sh [username] [host] [keyfile]
 USERNAME="${1:-root}"
-HOST="${2:-103.179.172.134}"
+HOST="${2:-103.179.173.10}"
 KEYFILE="${3:-./key.pem}"
 
 if [ "$#" -gt 3 ]; then
