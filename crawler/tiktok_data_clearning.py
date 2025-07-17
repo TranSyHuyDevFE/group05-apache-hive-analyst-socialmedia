@@ -3,7 +3,8 @@ import pytz  # Add this import for timezone handling
 
 
 class DataCleaning:
-    def convert_text_date_to_time_stamp(self, date_str):
+    @staticmethod
+    def convert_text_date_to_time_stamp(date_str):
         """
         Convert a single text-based date format to a Unix timestamp.
         :param date_str: A string representing the date.
@@ -45,7 +46,8 @@ class DataCleaning:
             print(f"Error processing date '{date_str}'. Error: {e}")
             return None
 
-    def convert_text_to_number(self, text_value):
+    @staticmethod
+    def convert_text_to_number(text_value):
         """
         Convert text-based numbers with suffixes like 'K', 'M' to actual numbers.
         :param text_value: A string representing the number (e.g., '266.4K').

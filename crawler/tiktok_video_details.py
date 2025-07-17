@@ -412,6 +412,9 @@ class TikTokVideoDetailScraper:
                     engagement_info['shares'] = DataCleaning.convert_text_to_number(
                         engagement_info['shares'])
 
+                    time_posted = DataCleaning.convert_text_date_to_time_stamp(
+                        time_posted)
+
                     video_info = {
                         "author": author_info,
                         "time_published": time_posted,
@@ -434,47 +437,47 @@ class TikTokVideoDetailScraper:
             print("Starting comment extraction phase...")
             time.sleep(3)  # Pause between phases
 
-            for video_url in video_urls:
-                try:
-                    print(f"Extracting comments for: {video_url}")
-                    # Open fresh tab for comments
-                    driver.execute_script("window.open('');")
-                    driver.switch_to.window(driver.window_handles[-1])
+            # for video_url in video_urls:
+            #     try:
+            #         print(f"Extracting comments for: {video_url}")
+            #         # Open fresh tab for comments
+            #         driver.execute_script("window.open('');")
+            #         driver.switch_to.window(driver.window_handles[-1])
 
-                    # Navigate to video with additional parameters to avoid detection
-                    comment_url = video_url + '?is_from_webapp=1&lang=en'
-                    driver.get(comment_url)
+            #         # Navigate to video with additional parameters to avoid detection
+            #         comment_url = video_url + '?is_from_webapp=1&lang=en'
+            #         driver.get(comment_url)
 
-                    # Wait and simulate human behavior
-                    time.sleep(3)
+            #         # Wait and simulate human behavior
+            #         time.sleep(3)
 
-                    # Extract comments with retry logic
-                    comments = self.extract_comments(driver, video_url)
+            #         # Extract comments with retry logic
+            #         comments = self.extract_comments(driver, video_url)
 
-                    if comments:
-                        self.save_comments(comments)
-                        print(
-                            f"Successfully extracted {len(comments)} comments from {video_url}")
-                    else:
-                        print(f"No comments found for {video_url}")
+            #         if comments:
+            #             self.save_comments(comments)
+            #             print(
+            #                 f"Successfully extracted {len(comments)} comments from {video_url}")
+            #         else:
+            #             print(f"No comments found for {video_url}")
 
-                    # Close the comment tab
-                    driver.close()
-                    driver.switch_to.window(driver.window_handles[0])
+            #         # Close the comment tab
+            #         driver.close()
+            #         driver.switch_to.window(driver.window_handles[0])
 
-                    # Add delay between videos to avoid spam detection
-                    time.sleep(2)
+            #         # Add delay between videos to avoid spam detection
+            #         time.sleep(2)
 
-                except Exception as e:
-                    print(f"Error extracting comments for {video_url}: {e}")
-                    # Try to close tab if it's still open
-                    try:
-                        if len(driver.window_handles) > 1:
-                            driver.close()
-                            driver.switch_to.window(driver.window_handles[0])
-                    except:
-                        pass
-                    continue
+            #     except Exception as e:
+            #         print(f"Error extracting comments for {video_url}: {e}")
+            #         # Try to close tab if it's still open
+            #         try:
+            #             if len(driver.window_handles) > 1:
+            #                 driver.close()
+            #                 driver.switch_to.window(driver.window_handles[0])
+            #         except:
+            #             pass
+            #         continue
 
         except Exception as e:
             print(f"Error in scrape_multiple_videos: {e}")
