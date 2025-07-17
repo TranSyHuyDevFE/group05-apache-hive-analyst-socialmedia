@@ -2,6 +2,7 @@ import os
 import time
 import pandas as pd
 from bs4 import BeautifulSoup
+from tiktok_data_clearning import DataCleaning
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -62,6 +63,7 @@ class TikTokVideoScraper:
                 "description": item.find("span", attrs={"style": "box-sizing: border-box; display: block; overflow: hidden;"}).get("alt") if item.find("span", attrs={"style": "box-sizing: border-box; display: block; overflow: hidden;"}) else None,
                 "likes": item.find("div", class_=lambda x: x and "css-qptaao-DivIconText" in x).find("span").get_text(strip=True) if item.find("div", class_=lambda x: x and "css-qptaao-DivIconText" in x) else None
             }
+            video_data["likes"] = DataCleaning.convert_text_to_number(video_data["likes"])
             return video_data
         return None
 
