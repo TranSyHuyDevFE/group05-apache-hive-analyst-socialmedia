@@ -223,6 +223,9 @@ class TikTokUserInfoScraper:
                         "followers": followers_count.get_text(strip=True) if followers_count else None,
                         "likes": likes_count.get_text(strip=True) if likes_count else None
                     }
+                    
+                    counts_info = {k: DataCleaning.convert_text_to_number(
+                        v) for k, v in counts_info.items()}
 
                     # Extract user bio
                     bio_element = soup.find(

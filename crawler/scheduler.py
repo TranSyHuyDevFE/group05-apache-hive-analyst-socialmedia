@@ -15,7 +15,7 @@ class HourlyScheduler:
             self._schedule_next()
 
     def _schedule_next(self):
-        self._timer = threading.Timer(3600, self._run)  # 1 hour = 3600 seconds
+        self._timer = threading.Timer(100, self._run)  # 1 hour = 3600 seconds
         self._timer.daemon = True
         self._timer.start()
 
@@ -29,7 +29,7 @@ class HourlyScheduler:
 
 # Example usage
 def my_task():
-    print(f"Task executed at {time.ctime()}")
+    print(f"Task executed at {time.localtime()}")
 
 if __name__ == "__main__":
     scheduler = HourlyScheduler(my_task)
