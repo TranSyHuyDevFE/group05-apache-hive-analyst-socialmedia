@@ -260,7 +260,7 @@ def my_task():
 
 
 if __name__ == "__main__":
-    scheduler = HourlyScheduler(3600, my_task)
+    scheduler = HourlyScheduler(3600 + 1800, my_task)
     scheduler.start()
     try:
         while True:
