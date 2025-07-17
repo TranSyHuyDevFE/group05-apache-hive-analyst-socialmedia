@@ -388,7 +388,7 @@ class TikTokVideoScraper:
             driver.execute_script("window.scrollTo(0, 0);")
             time.sleep(5)
             retry_count = 0
-            max_retries = 4
+            max_retries = 2
             while retry_count < max_retries:
                 try:
                     try:
@@ -415,7 +415,9 @@ class TikTokVideoScraper:
                     retry_count += 1
                     print(f"Retry {retry_count}/{max_retries} for category '{category['display']}': {e}")
                     try:
-                        arrow_icon = driver.find_element(By.CSS_SELECTOR, "div.css-1pi6qhe-DivArrowIconContainer e13i6o2411")
+                        driver.execute_script("window.scrollTo(0, 0);")
+                        time.sleep(2)
+                        arrow_icon = driver.find_element(By.CLASS_NAME, "css-1wvr0tq-DivArrowContainer e13i6o2410")
                         arrow_icon.click()
                     except Exception as arrow_error:
                         print(f"Failed to click arrow icon: {arrow_error}")

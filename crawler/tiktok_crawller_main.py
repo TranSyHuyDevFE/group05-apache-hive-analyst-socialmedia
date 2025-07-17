@@ -189,6 +189,7 @@ class TikTokCrawlerMain:
             return []
 
     def run(self):
+        MAX_VIDESO_URL_PER_CATEGORY = 40
         # Always load config from default path
         target_conf_path = self.io.duplicate_config(
             self.io.get_default_config_path(),  self.io.build_folder())
@@ -202,7 +203,7 @@ class TikTokCrawlerMain:
                 crawl_config.update_status(
                     category['category_slug'], ProcessStatus.CRAWLING_LIST_VIDEO)
                 self.trend_scraper.scrape_videos_by_one_category(
-                    category, max_crawled_items=10)
+                    category, max_crawled_items=MAX_VIDESO_URL_PER_CATEGORY)
                 crawl_config.update_status(
                     category['category_slug'], ProcessStatus.CRAWLED_LIST_VIDEO)
 
@@ -259,7 +260,7 @@ def my_task():
 
 
 if __name__ == "__main__":
-    scheduler = HourlyScheduler(my_task)
+    scheduler = HourlyScheduler(3600, my_task)
     scheduler.start()
     try:
         while True:

@@ -2,8 +2,9 @@ import threading
 import time
 
 class HourlyScheduler:
-    def __init__(self, func):
+    def __init__(self, seconds, func):
         self.func = func
+        self.seconds = seconds
         self._timer = None
         self._running = True
         self.func()  # Run immediately on init
@@ -15,7 +16,7 @@ class HourlyScheduler:
             self._schedule_next()
 
     def _schedule_next(self):
-        self._timer = threading.Timer(100, self._run)  # 1 hour = 3600 seconds
+        self._timer = threading.Timer(self.seconds, self._run)  # 1 hour = 3600 seconds
         self._timer.daemon = True
         self._timer.start()
 
@@ -27,18 +28,18 @@ class HourlyScheduler:
         # ...existing code...
         print("Hourly scheduler stopped.")
 
-# Example usage
-def my_task():
-    print(f"Task executed at {time.localtime()}")
+# # Example usage
+# def my_task():
+#     print(f"Task executed at {time.localtime()}")
 
-if __name__ == "__main__":
-    scheduler = HourlyScheduler(my_task)
-    # No need to call start(), already started in __init__
-    try:
-        while True:
-            time.sleep(1)  # Keeps the main thread alive
-    except KeyboardInterrupt:
-        scheduler.stop()
-        time.sleep(1)  # Keeps the main thread alive
-    except KeyboardInterrupt:
-        scheduler.stop()
+# if __name__ == "__main__":
+#     scheduler = HourlyScheduler(my_task)
+#     # No need to call start(), already started in __init__
+#     try:
+#         while True:
+#             time.sleep(1)  # Keeps the main thread alive
+#     except KeyboardInterrupt:
+#         scheduler.stop()
+#         time.sleep(1)  # Keeps the main thread alive
+#     except KeyboardInterrupt:
+#         scheduler.stop()
