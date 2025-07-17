@@ -25,7 +25,7 @@ rm -rf "$target_dir/scripts"
 cp -r scripts "$target_dir/"
 
 # Step 4: Execute create_tables.hql using docker beeline
-# docker exec -i hiveserver2 beeline -u jdbc:hive2://localhost:10000 -f /opt/hive/data/warehouse/scripts/create-tables.hql
+docker exec -i hiveserver2 beeline -u jdbc:hive2://localhost:10000 -f /opt/hive/data/warehouse/scripts/create-tables.hql
 # Step 5: Execute create-views.hql using docker beeline
 docker exec -i hiveserver2 beeline -u jdbc:hive2://localhost:10000 -f /opt/hive/data/warehouse/scripts/create-views.hql
 
