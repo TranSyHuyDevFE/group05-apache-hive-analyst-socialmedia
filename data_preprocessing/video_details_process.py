@@ -5,6 +5,9 @@ from datetime import datetime
 import pytz  # Add this import for timezone handling
 
 
+
+import ast
+
 class VideoDetailsProcessor:
     def clean_data(self, data: pd.DataFrame) -> pd.DataFrame:
         try:
@@ -15,36 +18,50 @@ class VideoDetailsProcessor:
             print(f"Error cleaning data: {e}")
             return data  # Return original data to avoid breaking the pipeline
 
+    @staticmethod
+    def parse_json_flexible(val):
+        if pd.isnull(val):
+            return None
+        # Try JSON loads directly
+        try:
+            return json.loads(val)
+        except Exception:
+            pass
+        # Try literal_eval (for single-quoted dicts)
+        try:
+            return ast.literal_eval(val)
+        except Exception:
+            pass
+        # Try fixing double-escaped JSON
+        try:
+            fixed = val.replace('""', '"').replace("'", '"')
+            return json.loads(fixed)
+        except Exception:
+            pass
+        return None
+
     def split_json_columns(self, data: pd.DataFrame) -> pd.DataFrame:
         try:
+            # Parse JSON-like columns robustly
             for column in ['author', 'music', 'engagement']:
                 if column in data.columns:
-                    data[column] = data[column].apply(
-                        lambda x: x.replace("'", '"') if pd.notnull(x) else x
-                    )
+                    data[column + '_dict'] = data[column].apply(self.parse_json_flexible)
 
-            # Extract JSON fields from specific columns
-            data['username'] = data['author'].apply(
-                lambda x: json.loads(x).get('username') if pd.notnull(x) else None)
-            data['nickname'] = data['author'].apply(
-                lambda x: json.loads(x).get('nickname') if pd.notnull(x) else None)
+            # Extract fields from parsed dicts
+            if 'author_dict' in data.columns:
+                data['username'] = data['author_dict'].apply(lambda x: x.get('username') if isinstance(x, dict) else None)
+                data['nickname'] = data['author_dict'].apply(lambda x: x.get('nickname') if isinstance(x, dict) else None)
+            if 'music_dict' in data.columns:
+                data['music_title'] = data['music_dict'].apply(lambda x: x.get('title') if isinstance(x, dict) else None)
+                data['music_link'] = data['music_dict'].apply(lambda x: x.get('link') if isinstance(x, dict) else None)
+            if 'engagement_dict' in data.columns:
+                data['likes'] = data['engagement_dict'].apply(lambda x: x.get('likes') if isinstance(x, dict) else None)
+                data['comments'] = data['engagement_dict'].apply(lambda x: x.get('comments') if isinstance(x, dict) else None)
+                data['shares'] = data['engagement_dict'].apply(lambda x: x.get('shares') if isinstance(x, dict) else None)
 
-            # Additional fields from 'music' column
-            data['music_title'] = data['music'].apply(
-                lambda x: json.loads(x).get('title') if pd.notnull(x) else None)
-            data['music_link'] = data['music'].apply(
-                lambda x: json.loads(x).get('link') if pd.notnull(x) else None)
-
-            # Additional fields from 'engagement' column
-            data['likes'] = data['engagement'].apply(
-                lambda x: json.loads(x).get('likes') if pd.notnull(x) else None)
-            data['comments'] = data['engagement'].apply(
-                lambda x: json.loads(x).get('comments') if pd.notnull(x) else None)
-            data['shares'] = data['engagement'].apply(
-                lambda x: json.loads(x).get('shares') if pd.notnull(x) else None)
-
-            # Drop original JSON columns
-            data = data.drop(columns=['author', 'music', 'engagement'])
+            # Drop original and intermediate columns
+            drop_cols = [col for col in ['author', 'music', 'engagement', 'author_dict', 'music_dict', 'engagement_dict'] if col in data.columns]
+            data = data.drop(columns=drop_cols)
             return data
         except Exception as e:
             print(f"Error splitting JSON columns: {e}")
@@ -65,8 +82,6 @@ class VideoDetailsProcessor:
                     lambda x: datetime.fromtimestamp(
                         x, hcm_tz).strftime('%d-%m-%Y') if x else None
                 )
-                print("After normalizing 'time_published':",
-                      data['time_published'].head())
 
             # Normalize numeric fields using convert_text_to_number
             for field in ['likes', 'comments', 'shares']:
@@ -91,5 +106,10 @@ class VideoDetailsProcessor:
         data = self.clean_data(data)
         data = self.split_json_columns(data)
         data = self.normalize(data)
+        # Drop duplicate rows based on 'video_url' column if it exists
+        if 'video_url' in data.columns:
+            before = len(data)
+            data = data.drop_duplicates(subset=['video_url'])
+            after = len(data)
         print("Processing completed.")
         return data

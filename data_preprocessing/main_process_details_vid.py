@@ -1,5 +1,8 @@
+
 from data_reader import DataReader
 from video_details_process import VideoDetailsProcessor
+from utils.file_name import FileNameGenerator
+import os
 
 # Read from ./mock/details_video_info.csv
 # proecesss
@@ -50,9 +53,15 @@ class MainProcessDetailsVid:
         print("Processed data preview:")
         print(processed_data.head())
 
+        # Generate output file name with prefix and date in HCM timezone
+        output_dir = "/workspaces/py_env_research/group05-apache-hive-analyst-socialmedia/cleaned_data"
+        os.makedirs(output_dir, exist_ok=True)
+        output_file = FileNameGenerator.generate("video_info_details") + ".csv"
+        output_path = os.path.join(output_dir, output_file)
+
         # Save processed data
-        self.io_handler.save_csv(processed_data, self.paths.output_path)
-        print("Data preprocessing completed successfully.")
+        self.io_handler.save_csv(processed_data, output_path)
+        print(f"Data preprocessing completed successfully. Output saved to: {output_path}")
 
 
 def main():
@@ -61,7 +70,7 @@ def main():
     """
     paths = FilePaths(
         input_path="./mock/details_video_info.csv",
-        output_path="./mock/details_video_info_processed.csv",
+        output_path=None,  # Output path will be generated dynamically
     )
     main_process = MainProcessDetailsVid(paths)
     main_process.run()

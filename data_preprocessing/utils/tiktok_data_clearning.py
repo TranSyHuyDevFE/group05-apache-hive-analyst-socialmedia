@@ -6,35 +6,44 @@ class DataCleaning:
     @staticmethod
     def convert_text_date_to_time_stamp(date_str):
         """
-        Convert a single text-based date format to a Unix timestamp.
-        :param date_str: A string representing the date.
+        Convert a single text-based date format or timestamp to a Unix timestamp.
+        :param date_str: A string, float, or int representing the date or timestamp.
         :return: Unix timestamp or None if conversion fails.
         """
         hcm_tz = pytz.timezone('Asia/Ho_Chi_Minh')  # Define HCM timezone
 
         try:
-            # Handle relative dates like "1w ago", "6d ago"
-            if "ago" in date_str:
-                time_units = {'w': 'weeks', 'd': 'days',
-                              'h': 'hours', 'm': 'minutes', 's': 'seconds'}
-                for unit, kwarg in time_units.items():
-                    if unit in date_str:
-                        value = int(date_str.split(unit)[0])
-                        dt = datetime.now() - timedelta(**{kwarg: value})
-                        dt = hcm_tz.localize(dt)  # Localize to HCM timezone
-                        return int(dt.timestamp())
-                raise ValueError("Unsupported relative time format")
+            # If already a float or int, treat as timestamp
+            if isinstance(date_str, (float, int)):
+                return int(float(date_str))
+            # If string that looks like a number, treat as timestamp
+            if isinstance(date_str, str) and date_str.replace('.', '', 1).isdigit():
+                return int(float(date_str))
 
-            # Handle absolute dates like "2023-10-01 12:00:00"
-            try:
-                dt = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
-            except ValueError:
-                # Handle short date format like "7-8" (month-day)
-                dt = datetime.strptime(date_str, '%m-%d')
-                # Assume current year
-                dt = dt.replace(year=datetime.now().year)
-            dt = hcm_tz.localize(dt)  # Localize to HCM timezone
-            return int(dt.timestamp())
+            # Only do string operations if it's a string
+            if isinstance(date_str, str):
+                # Handle relative dates like "1w ago", "6d ago"
+                if "ago" in date_str:
+                    time_units = {'w': 'weeks', 'd': 'days',
+                                  'h': 'hours', 'm': 'minutes', 's': 'seconds'}
+                    for unit, kwarg in time_units.items():
+                        if unit in date_str:
+                            value = int(date_str.split(unit)[0])
+                            dt = datetime.now() - timedelta(**{kwarg: value})
+                            dt = hcm_tz.localize(dt)  # Localize to HCM timezone
+                            return int(dt.timestamp())
+                    raise ValueError("Unsupported relative time format")
+
+                # Handle absolute dates like "2023-10-01 12:00:00"
+                try:
+                    dt = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+                except ValueError:
+                    # Handle short date format like "7-8" (month-day)
+                    dt = datetime.strptime(date_str, '%m-%d')
+                    # Assume current year
+                    dt = dt.replace(year=datetime.now().year)
+                dt = hcm_tz.localize(dt)  # Localize to HCM timezone
+                return int(dt.timestamp())
 
         except Exception as e:
             print(f"Error processing date '{date_str}'. Error: {e}")
