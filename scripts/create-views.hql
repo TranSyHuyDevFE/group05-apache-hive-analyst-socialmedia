@@ -1,0 +1,6 @@
+CREATE OR REPLACE VIEW v_top_hashtags AS
+SELECT trim(regexp_replace(hashtag, '[\\[\\]\'\"\\s]', '')) as clean_hashtag, COUNT(*) AS count
+FROM tiktok_video_info_details
+LATERAL VIEW explode(split(hashtags, ',')) t AS hashtag
+WHERE hashtag != '' AND hashtag IS NOT NULL
+GROUP BY trim(regexp_replace(hashtag, '[\\[\\]\'\"\\s]', ''));
