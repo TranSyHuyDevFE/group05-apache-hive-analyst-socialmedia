@@ -104,5 +104,5 @@ venv.bak/
 dmypy.json
 
 
-
-/raw_data/tiktok/*
+/crawler/raw_data/tiktok/*
+/crawler/group05-apache-hive-analyst-socialmedia/*

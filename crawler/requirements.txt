@@ -3,3 +3,5 @@ pandas
 selenium
 bs4
 supervisor
+schedule
+pytz
