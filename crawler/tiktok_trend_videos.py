@@ -10,6 +10,7 @@ from browser_setup import RealBrowser
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+
 class TikTokVideoScraper:
     def __init__(self, base_dir="raw_data/tiktok", output_file="video_info.csv"):
         self.output_file = output_file
@@ -28,31 +29,35 @@ class TikTokVideoScraper:
         if tab_index > 0:
             driver.execute_script("window.open('');")
             driver.switch_to.window(driver.window_handles[tab_index])
-        
+
         url = f"https://www.tiktok.com/explore"
         driver.get(url)
-        
+
         # Wait for page to load and click on category
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "category-list-container"))
         )
         time.sleep(2)
-        
+
         try:
-            category_button = driver.find_element(By.XPATH, f"//span[text()='{category['display']}']")
+            category_button = driver.find_element(
+                By.XPATH, f"//span[text()='{category['display']}']")
             category_button.click()
             time.sleep(2)
             print(f"Tab {tab_index}: Opened category {category['display']}")
         except Exception as e:
-            print(f"Tab {tab_index}: Failed to click category {category['display']}: {e}")
+            print(
+                f"Tab {tab_index}: Failed to click category {category['display']}: {e}")
 
     def get_explore_items(self, driver):
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        explore_items = soup.find_all("div", class_=lambda x: x and "css-10op4xt-DivContainer-StyledDivContainerV2" in x)
+        explore_items = soup.find_all(
+            "div", class_=lambda x: x and "css-10op4xt-DivContainer-StyledDivContainerV2" in x)
         return explore_items
 
     def extract_video_data(self, item):
-        video_link = item.find("a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)
+        video_link = item.find(
+            "a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)
         video_url = video_link['href'] if video_link else None
 
         if video_url and video_url not in self.seen_items:
@@ -63,7 +68,7 @@ class TikTokVideoScraper:
                 "description": item.find("span", attrs={"style": "box-sizing: border-box; display: block; overflow: hidden;"}).get("alt") if item.find("span", attrs={"style": "box-sizing: border-box; display: block; overflow: hidden;"}) else None,
                 "likes": item.find("div", class_=lambda x: x and "css-qptaao-DivIconText" in x).find("span").get_text(strip=True) if item.find("div", class_=lambda x: x and "css-qptaao-DivIconText" in x) else None
             }
-            video_data["likes"] = DataCleaning.convert_text_to_number(video_data["likes"])
+            # video_data["likes"] = DataCleaning.convert_text_to_number(video_data["likes"])
             return video_data
         return None
 
@@ -76,6 +81,7 @@ class TikTokVideoScraper:
         else:
             df.to_csv(file_path, index=False)
         print(f"Saved {len(self.all_video_info)} videos to {file_path}")
+        self.all_video_info.clear()  # Clear after saving
 
     def get_categories(self, driver):
         url = "https://www.tiktok.com/explore"
@@ -97,7 +103,8 @@ class TikTokVideoScraper:
         for span in category_container.find_all("span", class_=lambda x: x and "SpanCategoryName" in x):
             display = span.get_text(strip=True)
             if display:
-                slug = display.lower().replace("&", "and").replace("'", "").replace(".", "").replace(",", "")
+                slug = display.lower().replace("&", "and").replace(
+                    "'", "").replace(".", "").replace(",", "")
                 slug = "-".join(slug.split())
                 categories.append({"display": display, "slug": slug})
 
@@ -108,21 +115,24 @@ class TikTokVideoScraper:
         try:
             driver.switch_to.window(driver.window_handles[tab_index])
             category_seen_items = set()
-            
+
             while True:
                 WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-e2e='explore-item']"))
+                    EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, "div[data-e2e='explore-item']"))
                 )
                 time.sleep(2)
 
                 explore_items = self.get_explore_items(driver)
                 if not explore_items:
-                    print(f"Tab {tab_index}: No explore items found for {category['display']}")
+                    print(
+                        f"Tab {tab_index}: No explore items found for {category['display']}")
                     break
 
                 new_videos_found = False
                 for item in explore_items:
-                    video_data = self.extract_video_data_for_tab(item, category, category_seen_items)
+                    video_data = self.extract_video_data_for_tab(
+                        item, category, category_seen_items)
                     if video_data:
                         with self._lock:
                             self.all_video_info.append(video_data)
@@ -133,27 +143,32 @@ class TikTokVideoScraper:
                         self.save_video_info()
 
                 # Scroll down to load more content
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                driver.execute_script(
+                    "window.scrollTo(0, document.body.scrollHeight);")
                 time.sleep(3)
 
                 # Check if new content loaded
                 new_explore_items = self.get_explore_items(driver)
                 new_video_urls = {
-                    item.find("a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)['href']
-                    for item in new_explore_items 
+                    item.find(
+                        "a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)['href']
+                    for item in new_explore_items
                     if item.find("a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)
                 }
 
                 if not new_video_urls.difference(category_seen_items):
-                    print(f"Tab {tab_index}: No new items for {category['display']}. Reached end.")
+                    print(
+                        f"Tab {tab_index}: No new items for {category['display']}. Reached end.")
                     break
 
         except Exception as e:
-            print(f"Tab {tab_index}: Error scraping {category['display']}: {e}")
+            print(
+                f"Tab {tab_index}: Error scraping {category['display']}: {e}")
 
     def extract_video_data_for_tab(self, item, category, category_seen_items):
         """Extract video data with tab-specific seen items tracking"""
-        video_link = item.find("a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)
+        video_link = item.find(
+            "a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)
         video_url = video_link['href'] if video_link else None
 
         if video_url and video_url not in category_seen_items:
@@ -166,7 +181,7 @@ class TikTokVideoScraper:
                         "thumbnail": item.find("img")["src"] if item.find("img") else None,
                         "description": item.find("span", attrs={"style": "box-sizing: border-box; display: block; overflow: hidden;"}).get("alt") if item.find("span", attrs={"style": "box-sizing: border-box; display: block; overflow: hidden;"}) else None,
                         "likes": item.find("div", class_=lambda x: x and "css-qptaao-DivIconText" in x).find("span").get_text(strip=True) if item.find("div", class_=lambda x: x and "css-qptaao-DivIconText" in x) else None,
-                        "category": category['slug']
+                        "category": category
                     }
                     return video_data
         return None
@@ -186,30 +201,33 @@ class TikTokVideoScraper:
         """Quickly scrape a tab with limited scrolling"""
         if not self.tab_states[tab_index]['active']:
             return False
-            
+
         try:
             driver.switch_to.window(driver.window_handles[tab_index])
             tab_state = self.tab_states[tab_index]
             category = tab_state['category']
-            
+
             # Quick wait for content
             WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-e2e='explore-item']"))
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, "div[data-e2e='explore-item']"))
             )
-            
+
             new_videos_found = False
             explore_items = self.get_explore_items(driver)
-            
+
             if not explore_items:
                 tab_state['stale_count'] += 1
                 if tab_state['stale_count'] >= 3:
                     tab_state['active'] = False
-                    print(f"Tab {tab_index}: Deactivated {category['display']} - no content")
+                    print(
+                        f"Tab {tab_index}: Deactivated {category['display']} - no content")
                 return False
 
             # Process current items
             for item in explore_items:
-                video_data = self.extract_video_data_for_tab_quick(item, category, tab_state['seen_items'])
+                video_data = self.extract_video_data_for_tab_quick(
+                    item, category, tab_state['seen_items'])
                 if video_data:
                     with self._lock:
                         self.all_video_info.append(video_data)
@@ -218,21 +236,23 @@ class TikTokVideoScraper:
             # Quick scroll multiple times
             current_item_count = len(explore_items)
             for _ in range(scroll_count):
-                driver.execute_script("window.scrollBy(0, window.innerHeight);")
+                driver.execute_script(
+                    "window.scrollBy(0, window.innerHeight);")
                 time.sleep(0.5)  # Quick scroll
-            
+
             # Check if we're getting new content
             if current_item_count == tab_state['last_item_count']:
                 tab_state['stale_count'] += 1
                 if tab_state['stale_count'] >= 5:
                     tab_state['active'] = False
-                    print(f"Tab {tab_index}: Deactivated {category['display']} - reached end")
+                    print(
+                        f"Tab {tab_index}: Deactivated {category['display']} - reached end")
             else:
                 tab_state['stale_count'] = 0
                 tab_state['last_item_count'] = current_item_count
-            
+
             return new_videos_found
-            
+
         except Exception as e:
             print(f"Tab {tab_index}: Quick scrape error: {e}")
             return False
@@ -240,7 +260,8 @@ class TikTokVideoScraper:
     def extract_video_data_for_tab_quick(self, item, category, tab_seen_items):
         """Quick video data extraction with minimal processing"""
         try:
-            video_link = item.find("a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)
+            video_link = item.find(
+                "a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)
             video_url = video_link['href'] if video_link else None
 
             if video_url and video_url not in tab_seen_items:
@@ -250,8 +271,9 @@ class TikTokVideoScraper:
                         self.seen_items.add(video_url)
                         # Quick data extraction
                         img_tag = item.find("img")
-                        likes_div = item.find("div", class_=lambda x: x and "css-qptaao-DivIconText" in x)
-                        
+                        likes_div = item.find(
+                            "div", class_=lambda x: x and "css-qptaao-DivIconText" in x)
+
                         video_data = {
                             "url": video_url,
                             "thumbnail": img_tag["src"] if img_tag else None,
@@ -271,56 +293,61 @@ class TikTokVideoScraper:
             # Get initial page to fetch categories
             driver.get("https://www.tiktok.com/explore")
             categories = self.get_categories(driver)
-            
+
             if max_categories:
                 categories = categories[:max_categories]
-            
-            print(f"Starting fast multi-tab scraping for {len(categories)} categories")
-            
+
+            print(
+                f"Starting fast multi-tab scraping for {len(categories)} categories")
+
             # Open tabs and initialize states
             for i, category in enumerate(categories):
                 self.open_category_tab(driver, category, i)
                 self.init_tab_state(i, category)
                 time.sleep(0.5)  # Quick delay
-            
+
             # Round-robin tab switching
             round_count = 0
             videos_found_this_round = True
-            
+
             while round_count < max_rounds and videos_found_this_round:
                 videos_found_this_round = False
-                active_tabs = [i for i, state in self.tab_states.items() if state['active']]
-                
+                active_tabs = [
+                    i for i, state in self.tab_states.items() if state['active']]
+
                 if not active_tabs:
                     print("No active tabs remaining")
                     break
-                
-                print(f"Round {round_count + 1}: Processing {len(active_tabs)} active tabs")
-                
+
+                print(
+                    f"Round {round_count + 1}: Processing {len(active_tabs)} active tabs")
+
                 # Quick switch between tabs
                 for tab_index in active_tabs:
                     category_name = self.tab_states[tab_index]['category']['display']
                     print(f"  Switching to tab {tab_index}: {category_name}")
-                    
-                    found_videos = self.quick_scrape_tab(driver, tab_index, scroll_count=2)
+
+                    found_videos = self.quick_scrape_tab(
+                        driver, tab_index, scroll_count=2)
                     if found_videos:
                         videos_found_this_round = True
-                    
+
                     time.sleep(0.2)  # Brief pause between tab switches
-                
+
                 round_count += 1
-                
+
                 # Periodic save
                 if round_count % save_interval == 0:
                     with self._lock:
                         self.save_video_info()
-                    print(f"Round {round_count}: Saved {len(self.all_video_info)} videos")
-            
+                    print(
+                        f"Round {round_count}: Saved {len(self.all_video_info)} videos")
+
             # Final save
                 self.save_video_info()
             print(f"Fast multi-tab scraping completed in {round_count} rounds")
             print(f"Total videos: {len(self.all_video_info)}")
-            
+
         finally:
             driver.quit()
 
@@ -337,13 +364,15 @@ class TikTokVideoScraper:
                 print(f"Switching to category: {category['display']}")
                 driver.execute_script("window.scrollTo(0, 0);")
                 time.sleep(5)
-                category_button = driver.find_element(By.XPATH, f"//span[text()='{category['display']}']")
+                category_button = driver.find_element(
+                    By.XPATH, f"//span[text()='{category['display']}']")
                 category_button.click()
                 time.sleep(2)
 
                 while True:
                     WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-e2e='explore-item']"))
+                        EC.presence_of_element_located(
+                            (By.CSS_SELECTOR, "div[data-e2e='explore-item']"))
                     )
                     time.sleep(2)
 
@@ -362,12 +391,14 @@ class TikTokVideoScraper:
 
                     self.save_video_info()
 
-                    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                    driver.execute_script(
+                        "window.scrollTo(0, document.body.scrollHeight);")
                     time.sleep(2)
 
                     new_explore_items = self.get_explore_items(driver)
                     new_video_urls = {
-                        item.find("a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)['href']
+                        item.find(
+                            "a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)['href']
                         for item in new_explore_items if item.find("a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)
                     }
 
@@ -376,8 +407,8 @@ class TikTokVideoScraper:
                         break
         finally:
             driver.quit()
-    def scrape_videos_by_one_category(self, category: dict
-                                      , output_callback=None, max_crawled_items = 2000):
+
+    def scrape_videos_by_one_category(self, category: dict, output_callback=None, max_crawled_items=2000):
         """Original single-tab scraping method (kept for backward compatibility)"""
         url = "https://www.tiktok.com/explore"
         driver = self.setup_browser()
@@ -406,30 +437,36 @@ class TikTokVideoScraper:
                             });
                         """)
                     except Exception as e:
-                        print(f"Error removing captcha container or modal overlays: {e}")
-                    
-                    category_button = driver.find_element(By.XPATH, f"//span[text()='{category['display']}']")
+                        print(
+                            f"Error removing captcha container or modal overlays: {e}")
+
+                    category_button = driver.find_element(
+                        By.XPATH, f"//span[text()='{category['display']}']")
                     category_button.click()
                     break
                 except Exception as e:
                     retry_count += 1
-                    print(f"Retry {retry_count}/{max_retries} for category '{category['display']}': {e}")
+                    print(
+                        f"Retry {retry_count}/{max_retries} for category '{category['display']}': {e}")
                     try:
                         driver.execute_script("window.scrollTo(0, 0);")
                         time.sleep(2)
-                        arrow_icon = driver.find_element(By.CLASS_NAME, "css-1wvr0tq-DivArrowContainer e13i6o2410")
+                        arrow_icon = driver.find_element(
+                            By.CLASS_NAME, "css-1wvr0tq-DivArrowContainer e13i6o2410")
                         arrow_icon.click()
                     except Exception as arrow_error:
                         print(f"Failed to click arrow icon: {arrow_error}")
                     time.sleep(2)
             else:
-                print(f"Failed to select category '{category['display']}' after {max_retries} retries.")
+                print(
+                    f"Failed to select category '{category['display']}' after {max_retries} retries.")
             time.sleep(2)
             _max_crawlled_items = 0
 
             while True:
                 WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-e2e='explore-item']"))
+                    EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, "div[data-e2e='explore-item']"))
                 )
                 time.sleep(2)
 
@@ -448,12 +485,14 @@ class TikTokVideoScraper:
 
                 self.save_video_info()
 
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                driver.execute_script(
+                    "window.scrollTo(0, document.body.scrollHeight);")
                 time.sleep(2)
 
                 new_explore_items = self.get_explore_items(driver)
                 new_video_urls = {
-                    item.find("a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)['href']
+                    item.find(
+                        "a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)['href']
                     for item in new_explore_items if item.find("a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)
                 }
 
@@ -462,18 +501,21 @@ class TikTokVideoScraper:
                     break
                 _max_crawlled_items += len(new_video_urls)
                 if _max_crawlled_items >= max_crawled_items:
-                    print(f"Reached max crawl limit of {_max_crawlled_items} items.")
+                    print(
+                        f"Reached max crawl limit of {_max_crawlled_items} items.")
                     break
         finally:
             driver.quit()
 
+
 if __name__ == "__main__":
     scraper = TikTokVideoScraper()
     # Use fast multi-tab scraping (new optimized method)
-    scraper.scrape_videos_multi_tab_fast(max_categories=5, max_rounds=30, save_interval=5)
-    
+    scraper.scrape_videos_multi_tab_fast(
+        max_categories=5, max_rounds=30, save_interval=5)
+
     # Or use previous multi-tab method
     # scraper.scrape_videos_multi_tab(max_categories=5)
-    
+
     # Or use original single-tab method
     # scraper.scrape_videos()

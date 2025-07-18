@@ -269,7 +269,8 @@ class TikTokVideoDetailScraper:
                     "avatar_url": user_info["avatar_url"] if user_info else None,
                     "content": content,
                     "likes": likes,
-                    "timestamp": DataCleaning.convert_text_date_to_time_stamp(timestamp),
+                    "timestamp": timestamp,
+                    # "timestamp": DataCleaning.convert_text_date_to_time_stamp(timestamp),
                     "parent_comment": parent_content,
                     "video_url": video_url
                 })
@@ -405,15 +406,15 @@ class TikTokVideoDetailScraper:
                         "shares": action_bar_container.find("strong", attrs={"data-e2e": "share-count"}).get_text(strip=True) if action_bar_container.find("strong", attrs={"data-e2e": "share-count"}) else None,
                     }
 
-                    engagement_info['likes'] = DataCleaning.convert_text_to_number(
-                        engagement_info['likes'])
-                    engagement_info['comments'] = DataCleaning.convert_text_to_number(
-                        engagement_info['comments'])
-                    engagement_info['shares'] = DataCleaning.convert_text_to_number(
-                        engagement_info['shares'])
+                    # engagement_info['likes'] = DataCleaning.convert_text_to_number(
+                    #     engagement_info['likes'])
+                    # engagement_info['comments'] = DataCleaning.convert_text_to_number(
+                    #     engagement_info['comments'])
+                    # engagement_info['shares'] = DataCleaning.convert_text_to_number(
+                    #     engagement_info['shares'])
 
-                    time_posted = DataCleaning.convert_text_date_to_time_stamp(
-                        time_posted)
+                    # time_posted = DataCleaning.convert_text_date_to_time_stamp(
+                    #     time_posted)
 
                     video_info = {
                         "author": author_info,

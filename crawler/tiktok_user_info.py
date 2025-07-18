@@ -87,8 +87,8 @@ class TikTokUserInfoScraper:
         }
 
         # Clean
-        counts_info = {k: DataCleaning.convert_text_to_number(
-            v) for k, v in counts_info.items()}
+        # counts_info = {k: DataCleaning.convert_text_to_number(
+        #     v) for k, v in counts_info.items()}
 
         # Extract user bio
         bio_element = soup.find("h2", attrs={"data-e2e": "user-bio"})
@@ -224,8 +224,8 @@ class TikTokUserInfoScraper:
                         "likes": likes_count.get_text(strip=True) if likes_count else None
                     }
                     
-                    counts_info = {k: DataCleaning.convert_text_to_number(
-                        v) for k, v in counts_info.items()}
+                    # counts_info = {k: DataCleaning.convert_text_to_number(
+                    #     v) for k, v in counts_info.items()}
 
                     # Extract user bio
                     bio_element = soup.find(
