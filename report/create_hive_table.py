@@ -1,0 +1,1 @@
+# Implement create hive table to build report

@@ -2,7 +2,7 @@
 
 # Exit immediately if a command exits with a non-zero status
 set -e
-
+rm -rf ./group05-apache-hive-analyst-socialmedia
 # Variables
 GITHUB_USERNAME="khaphan-github" # Replace with your GitHub username
 GITHUB_EMAIL="phanhoangkha01@gmail.com" # Replace with your GitHub email
@@ -39,6 +39,7 @@ fi
 
 # Stage changes, commit, and push
 # Use the correct relative path for git add
+git pull --no-ff
 git add crawler/raw_data/tiktok_zipped
 COMMIT_MESSAGE="crawldata $(date +'%Y-%m-%d %H:%M')"
 git commit -m "$COMMIT_MESSAGE"
