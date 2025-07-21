@@ -66,11 +66,17 @@ LOCATION '/opt/hive/data/warehouse/tiktok/video';
 
 -- Create external table for TikTok video info details data
 CREATE EXTERNAL TABLE IF NOT EXISTS tiktok_video_info_details (
-  author STRING,
+  time_published STRING,
   description STRING,
   hashtags STRING,
-  music STRING,
-  engagement STRING
+  video_url STRING,
+  username STRING,
+  nickname STRING,
+  music_title STRING,
+  music_link STRING,
+  likes STRING,
+  comments STRING,
+  shares STRING
 )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
 WITH SERDEPROPERTIES (
@@ -80,3 +86,26 @@ WITH SERDEPROPERTIES (
 )
 STORED AS TEXTFILE
 LOCATION '/opt/hive/data/warehouse/tiktok/video_info_details';
+
+-- Create external table for TikTok user info details data
+CREATE EXTERNAL TABLE IF NOT EXISTS tiktok_user_info_details (
+  user_title STRING,
+  user_subtitle STRING,
+  avatar_url STRING,
+  bio STRING,
+  username STRING,
+  `following` STRING,
+  `followers` STRING,
+  `likes` STRING,
+  first_link_url STRING,
+  first_link_text STRING
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES (
+  "separatorChar" = ",",
+  "quoteChar"     = "\"",
+  "escapeChar"    = "\\"
+)
+STORED AS TEXTFILE
+LOCATION '/opt/hive/data/warehouse/tiktok/user_info_details';
+
