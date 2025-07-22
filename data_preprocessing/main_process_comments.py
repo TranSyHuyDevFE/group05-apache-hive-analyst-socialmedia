@@ -41,7 +41,7 @@ class MainProcessComments:
 
 def main():
     paths = FilePaths(
-        input_path="./mock/comments.csv",
+        input_path="./term/comments.csv",
         output_path=None,
     )
     main_process = MainProcessComments(paths)

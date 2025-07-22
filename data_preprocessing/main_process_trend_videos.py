@@ -41,7 +41,7 @@ class MainProcessTrendVideos:
 
 def main():
     paths = FilePaths(
-        input_path="./mock/trend_videos.csv",
+        input_path="./term/trend_videos.csv",
         output_path=None,
     )
     main_process = MainProcessTrendVideos(paths)
