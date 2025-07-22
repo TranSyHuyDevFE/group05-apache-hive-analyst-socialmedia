@@ -1,78 +1,59 @@
-import pandas as pd
+from playwright.sync_api import sync_playwright
+import csv
 import re
-import random
+profile_path = "C:/Users/syhuy/AppData/Local/Google/Chrome/User Data"
 
-# === CONSTANTS ===
-INPUT_FILE = "tiktok10.csv"
-OUTPUT_FILE = "comments_cleaned2.csv"
-VIDEO_URL = "https://www.tiktok.com/@kimanhne_36/video/7525671270936022290"
+def clean_text(text):
+    return re.sub(r'[^\w\s,.!?@]', '', text).strip()
 
-# === FUNCTIONS ===
+def crawl_comments(video_url: str, output_csv='comments.csv'):
+    with sync_playwright() as p:
+        context = p.chromium.launch_persistent_context(
+            user_data_dir=profile_path,
+            headless=False,
+            args=["--start-maximized"]
+        )
 
-def convert_likes(like):
-    if pd.isna(like): return 0
-    like = str(like).strip().upper()
-    if 'K' in like:
-        try:
-            return int(float(like.replace('K', '')) * 1000)
-        except:
-            return 0
-    try:
-        return int(like)
-    except:
-        return 0
+        page = context.new_page()
+        print(f"oppening ====>>>>>> : {video_url}")
+        page.goto(video_url)
+        page.wait_for_timeout(5000)
 
-def random_date_in_may_to_july():
-    day = random.randint(1, 28)
-    month = random.randint(5, 7)
-    return f"{day:02d}-{month:02d}-2025"
+        for _ in range(10):
+            page.mouse.wheel(0, 3000)
+            page.wait_for_timeout(1200)
 
-def extract_username(url):
-    try:
-        match = re.search(r"@[\w.]+", str(url))
-        return match.group(0) if match else ""
-    except:
-        return ""
+        # Ready to query comments DOM 
+        comment_items = page.query_selector_all("div.css-1gstnae-DivCommentItemWrapper")
+        comments = []
 
-# === LOAD DATA ===
-try:
-    df = pd.read_csv(INPUT_FILE, encoding='utf-8', dtype=str)  # Bắt buộc ép string toàn bộ
-except Exception as e:
-    print(f"error ===>: {e}")
-    exit()
+        for item in comment_items:
+            try:
+                username = item.query_selector("div[data-e2e^='comment-username'] p").inner_text() or ""
+                comment_text = item.query_selector("span[data-e2e^='comment-level'] p").inner_text() or ""
+                likes = item.query_selector("div[aria-label*='Like video'] span")
+                likes = likes.inner_text() if likes else "0"
+                timestamp = item.query_selector("div.css-1lglotn-DivCommentSubContentWrapper span")
+                timestamp = timestamp.inner_text() if timestamp else ""
 
-# === format all to string ===
-df = df.astype(str)
+                comments.append({
+                    "username": clean_text(username),
+                    "comment": clean_text(comment_text),
+                    "likes": int(re.sub(r"\D", "", likes) or "0"),
+                    "timestamp": timestamp.strip()
+                })
+            except Exception as e:
+                print(f"[!] error: {e}")
+                continue
+            
+        # Export to CSV
+        with open(output_csv, "w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=["username", "comment", "likes", "timestamp"])
+            writer.writeheader()
+            writer.writerows(comments)
 
-# === CLEANING ===
-if 'username' in df.columns:
-    df['username'] = df['username'].apply(extract_username)
+        print(f" ===> {len(comments)} comments {output_csv}")
+        context.close()
 
-if 'likes' in df.columns:
-    df['likes'] = df['likes'].apply(convert_likes)
-
-if 'timestamp' in df.columns:
-    df['timestamp'] = df['timestamp'].apply(lambda x: random_date_in_may_to_july())
-
-
-df['video_url'] = VIDEO_URL
-
-columns = list(df.columns)
-
-# === REORDER COLUMNS ===
-ordered = []
-for col in ['username', 'comment', 'timestamp', 'likes']:
-    if col in columns:
-        ordered.append(col)
-if 'video_url' in columns:
-    ordered.append('video_url')
-
-for col in columns:
-    if col not in ordered:
-        ordered.append(col)
-
-df = df[ordered]
-
-# === genarate file scv ===
-df.to_csv(OUTPUT_FILE, index=False)
-print(f"one: {OUTPUT_FILE}")
+# input here the TikTok video URL    
+crawl_comments("https://www.tiktok.com/@8kgocnhin/video/7528732251836878088")
