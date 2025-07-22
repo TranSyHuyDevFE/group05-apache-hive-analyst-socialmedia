@@ -3,7 +3,7 @@ from related_videos_process import RelatedVideosProcessor
 from utils.file_name import FileNameGenerator
 import os
 
-# Read from ./mock/related_videos.csv
+# Read from ./term/related_videos.csv
 # Process
 # Save to ./cleaned_data/related_videos_processed_<date>.csv
 
@@ -51,7 +51,7 @@ class MainProcessRelatedVideos:
 
 def main():
     paths = FilePaths(
-        input_path="./mock/related_videos.csv",
+        input_path="./term/related_videos.csv",
         output_path=None,  # Output path will be generated dynamically
     )
     main_process = MainProcessRelatedVideos(paths)

@@ -4,9 +4,9 @@ from video_details_process import VideoDetailsProcessor
 from utils.file_name import FileNameGenerator
 import os
 
-# Read from ./mock/details_video_info.csv
+# Read from ./term/details_video_info.csv
 # proecesss
-# Save to ./mock/details_video_info_processed.csv
+# Save to ./term/details_video_info_processed.csv
 
 
 class FilePaths:
@@ -69,7 +69,7 @@ def main():
     Main function for the data preprocessing script.
     """
     paths = FilePaths(
-        input_path="./mock/details_video_info.csv",
+        input_path="./term/details_video_info.csv",
         output_path=None,  # Output path will be generated dynamically
     )
     main_process = MainProcessDetailsVid(paths)

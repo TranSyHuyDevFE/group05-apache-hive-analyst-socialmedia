@@ -37,7 +37,7 @@ class MainProcessUserDetails:
 
 def main():
     paths = FilePaths(
-        input_path="./mock/user_info.csv",
+        input_path="./term/user_info.csv",
         output_path=None,  # Output path will be generated dynamically
     )
     main_process = MainProcessUserDetails(paths)

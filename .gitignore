@@ -1,5 +1,4 @@
 /crawler/browser_profile/*
-/volumes/*
 
 # Python cache files
 __pycache__/
