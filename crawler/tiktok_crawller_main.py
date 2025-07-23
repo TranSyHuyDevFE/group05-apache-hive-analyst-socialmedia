@@ -189,7 +189,7 @@ class TikTokCrawlerMain:
             return []
 
     def run(self):
-        MAX_VIDESO_URL_PER_CATEGORY = 40
+        MAX_VIDESO_URL_PER_CATEGORY = 250
         # Always load config from default path
         target_conf_path = self.io.duplicate_config(
             self.io.get_default_config_path(),  self.io.build_folder())
@@ -220,7 +220,7 @@ class TikTokCrawlerMain:
                     category['category_slug'], ProcessStatus.CRAWLING_USER_INFO)
                 video_urls = [video['url'] for video in self.load_trend_videos_crawled_by_category(
                     category['category_slug'])]
-                
+
                 user_url_crawler_chunks = [video_urls[i:i + 20]
                                            for i in range(0, len(video_urls), 20)]
                 for chunk in user_url_crawler_chunks:
@@ -230,7 +230,6 @@ class TikTokCrawlerMain:
                 crawl_config.update_status(
                     category['category_slug'], ProcessStatus.CRAWLED_USER_INFO)
 
-                
         category_crawled_video_list = crawl_config.get_category_by_status(
             ProcessStatus.CRAWLED_USER_INFO)
         if category_crawled_video_list:
