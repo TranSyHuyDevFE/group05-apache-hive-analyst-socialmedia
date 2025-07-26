@@ -189,7 +189,7 @@ class TikTokCrawlerMain:
             return []
 
     def run(self):
-        MAX_VIDESO_URL_PER_CATEGORY = 10
+        MAX_VIDESO_URL_PER_CATEGORY = 259
         # Always load config from default path
         target_conf_path = self.io.duplicate_config(
             self.io.get_default_config_path(),  self.io.build_folder())
