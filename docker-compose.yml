@@ -83,7 +83,10 @@ services:
       superset init &&
       superset run -h 0.0.0.0 -p 8088
       "
-
+  
+  auto-crawler:
+    build: ./background_job
+    container_name: auto-crawler
 networks:
   hive:
     name: hive
