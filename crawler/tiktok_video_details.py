@@ -295,8 +295,11 @@ class TikTokVideoDetailScraper:
         except Exception as e:
             print(f"Error scraping detail page {video_url}: {e}")
 
-    def scrape_multiple_videos(self, video_urls, profile_dir="./persistent_browser_data"):
-        """Scrape multiple video URLs sequentially using one browser tab."""
+    def scrape_multiple_videos(self, video_urls, profile_dir="./persistent_browser_data", enable_comment=False, max_tabs=5):
+        """
+        Scrape multiple video URLs by opening them in multiple tabs first, then loop back to crawl details.
+        This improves performance by parallelizing page loads.
+        """
         if not video_urls:
             print("No video URLs provided")
             return
@@ -304,13 +307,10 @@ class TikTokVideoDetailScraper:
         driver = self.setup_browser(profile_dir=profile_dir, load_previous_session=True)
         browser = self.browser
         try:
-            print(f"Processing {len(video_urls)} video details sequentially...")
-            browser.load_cookies(url="https://www.tiktok.com/explore")
-
             for i, video_url in enumerate(video_urls):
                 try:
                     # Navigate to each video URL in the same tab
-                    browser.navigate_and_save_cookies(video_url + '?is_from_webapp=1', save_cookies_after=True)
+                    browser.open_new_tab(video_url + '?is_from_webapp=1', )
                     print(f"Processing video {i+1}/{len(video_urls)}: {video_url}")
                     time.sleep(2)
                     soup = BeautifulSoup(driver.page_source, "html.parser")
@@ -347,15 +347,17 @@ class TikTokVideoDetailScraper:
                     print(f"Successfully processed video details: {video_url}")
 
                     # Extract comments for each video after details
-                    print(f"Extracting comments for: {video_url}")
-                    browser.navigate_and_save_cookies(video_url + '?is_from_webapp=1&lang=vi')
-                    time.sleep(3.5)
-                    comments = self.extract_comments(driver, video_url)
-                    if comments:
-                        self.save_comments(comments)
-                        print(f"Successfully extracted {len(comments)} comments from {video_url}")
-                    else:
-                        print(f"No comments found for {video_url}")
+                   
+                    if enable_comment == True:
+                        print(f"Extracting comments for: {video_url}")
+                        browser.navigate_and_save_cookies(video_url + '?is_from_webapp=1&lang=vi')
+                        time.sleep(3.5)
+                        comments = self.extract_comments(driver, video_url)
+                        if comments:
+                            self.save_comments(comments)
+                            print(f"Successfully extracted {len(comments)} comments from {video_url}")
+                        else:
+                            print(f"No comments found for {video_url}")
                     time.sleep(2)
                 except Exception as e:
                     print(f"Error processing video {video_url}: {e}")

@@ -214,24 +214,24 @@ class TikTokCrawlerMain:
         # Optimize performnace it take about 10 - 15 seoncd for one vid -> 700vid -> 7000s = 2 hours
         category_crawled_video_list = crawl_config.get_category_by_status(
             ProcessStatus.CRAWLED_LIST_VIDEO)
-        if category_crawled_video_list:
-            for category in category_crawled_video_list:
-                crawl_config.update_status(
-                    category['category_slug'], ProcessStatus.CRAWLING_USER_INFO)
-                video_urls = [video['url'] for video in self.load_trend_videos_crawled_by_category(
-                    category['category_slug'])]
+        # if category_crawled_video_list:
+        #     for category in category_crawled_video_list:
+        #         crawl_config.update_status(
+        #             category['category_slug'], ProcessStatus.CRAWLING_USER_INFO)
+        #         video_urls = [video['url'] for video in self.load_trend_videos_crawled_by_category(
+        #             category['category_slug'])]
 
-                user_url_crawler_chunks = [video_urls[i:i + 20]
-                                           for i in range(0, len(video_urls), 20)]
-                for chunk in user_url_crawler_chunks:
-                    usernames = [url.split('/')[3].replace('@', '')
-                                 for url in chunk]
-                    self.user_info_scraper.scrape_multiple_users(usernames)
-                crawl_config.update_status(
-                    category['category_slug'], ProcessStatus.CRAWLED_USER_INFO)
+        #         user_url_crawler_chunks = [video_urls[i:i + 20]
+        #                                    for i in range(0, len(video_urls), 20)]
+        #         for chunk in user_url_crawler_chunks:
+        #             usernames = [url.split('/')[3].replace('@', '')
+        #                          for url in chunk]
+        #             self.user_info_scraper.scrape_multiple_users(usernames)
+        #         crawl_config.update_status(
+        #             category['category_slug'], ProcessStatus.CRAWLED_USER_INFO)
 
-        category_crawled_video_list = crawl_config.get_category_by_status(
-            ProcessStatus.CRAWLED_USER_INFO)
+        # category_crawled_video_list = crawl_config.get_category_by_status(
+        #     ProcessStatus.CRAWLED_USER_INFO)
         if category_crawled_video_list:
             for category in category_crawled_video_list:
                 crawl_config.update_status(
@@ -242,7 +242,7 @@ class TikTokCrawlerMain:
                 chunks = [video_urls[i:i + 20]
                           for i in range(0, len(video_urls), 20)]
                 for chunk in chunks:
-                    self.detail_scraper.scrape_multiple_videos(chunk)
+                    self.detail_scraper.scrape_multiple_videos(chunk, enable_comment=False)
 
                 crawl_config.update_status(
                     category['category_slug'], ProcessStatus.FINISH)
