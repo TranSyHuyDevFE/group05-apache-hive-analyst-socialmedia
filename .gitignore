@@ -1,5 +1,5 @@
 /crawler/browser_profile/*
-
+/crawler/persistent_browser_data/*
 # Python cache files
 __pycache__/
 *.py[cod]
