@@ -9,6 +9,11 @@ class SentimentProcessing:
         self.text_column = text_column
 
     def run(self):
+        '''
+          Doc file csv
+          Xư ly cot content
+          Save result to column 'sentiment'
+        '''
         for filename in os.listdir(self.input_dir):
             if filename.endswith(".csv"):
                 input_path = os.path.join(self.input_dir, filename)
@@ -20,5 +25,6 @@ class SentimentProcessing:
                 print(df.head())
 
 if __name__ == "__main__":
+    # TODO: mark if file is processed , dont do it again, or not 
     main = SentimentProcessing(input_dir="../cleaned_data/comments", output_dir="../cleaned_data/comments")
     main.run()

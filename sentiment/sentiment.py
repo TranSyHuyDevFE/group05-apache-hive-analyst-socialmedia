@@ -5,23 +5,16 @@ import string
 from underthesea import word_tokenize
 
 class TextProcessing:
-  def __init__(self, lowercase=True, remove_punctuation=True, remove_numbers=True):
-    self.lowercase = lowercase
-    self.remove_punctuation = remove_punctuation
-    self.remove_numbers = remove_numbers
+  def __init__(self):
     self.stopwords = TextProcessing.read_stopwords("vietnamese_stopwords.txt")
 
   def clean_text(self, text):
     text = str(text) if text is not None else ""
     if text is None:
       return ""
-    if self.lowercase:
-      text = text.lower()
-    if self.remove_punctuation:
-      # Remove punctuation, but keep Vietnamese characters
-      text = text.translate(str.maketrans('', '', string.punctuation + '“”‘’…'))
-    if self.remove_numbers:
-      text = re.sub(r'\d+', '', text)
+    text = text.lower()
+    text = text.translate(str.maketrans('', '', string.punctuation + '“”‘’…'))
+    text = re.sub(r'\d+', '', text)
     text = text.strip()
     text = re.sub(r'\s+', ' ', text)
     return text
@@ -47,14 +40,16 @@ class SentimentAnalyzer:
     self.max_tokens = max_tokens
 
   def get_sentiment(self, text):
-    # Clean and preprocess text before sentiment analysis
+    # Xu ly text
     cleaned = self.tp.clean_text(text)
     tokens = self.tp.tokenize(cleaned)
     tokens = tokens[:self.max_tokens]
     filtered_text = ' '.join(self.tp.remove_stopwords(tokens))
+    
+    # Xu ly phan loai cam xuc
     result = self.sentiment_task(filtered_text)[0]
-    return result['label']  # chỉ trả về label
-
+    
+    return result['label'] 
   def analyze(self, df, text_column):
     df = df.copy()
     df['sentiment'] = df[text_column].apply(self.get_sentiment)

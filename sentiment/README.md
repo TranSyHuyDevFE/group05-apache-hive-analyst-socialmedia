@@ -4,6 +4,7 @@ python3 sentiment.py
 
 # Mmodel:
 https://huggingface.co/5CD-AI/Vietnamese-Sentiment-visobert
+Max lenght 256
 
 # Xử lý nhận diện đâu là văn bản mang tính tích cực đâu là văn bản mang tính tiêu cực
 Về điểm sentiment (cảm xúc):
