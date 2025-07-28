@@ -16,3 +16,7 @@ POS (Tích cực)
 1. Crawll comment
 2. Preprocessing data
 3. run main.py to analysis
+
+# TODO
+[ ] Văn bản dài quá thì không đưa vào model xử lý dược rồi làm sao?
+[ ] Ghép vô chổ chạy tự động khi job clean data chạy xong.
