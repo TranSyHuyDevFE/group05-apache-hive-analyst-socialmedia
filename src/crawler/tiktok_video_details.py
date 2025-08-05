@@ -23,10 +23,11 @@ class TikTokVideoDetailScraper:
         self.seen_items = set()
         self.all_video_info = []
 
-    def setup_browser(self, profile_dir="./persistent_browser_data", load_previous_session=True):
+    def setup_browser(self, profile_dir="./browser_profile", load_previous_session=True):
         """Setup browser with persistent profile and session/cookie persistence"""
         self.browser = RealBrowser(profile_dir=profile_dir)
-        driver = self.browser.setup_browser(load_previous_session=load_previous_session)
+        driver = self.browser.setup_browser(
+            load_previous_session=load_previous_session)
         return driver
 
     def save_video_info(self, video_info, video_url):
@@ -294,7 +295,7 @@ class TikTokVideoDetailScraper:
         except Exception as e:
             print(f"Error scraping detail page {video_url}: {e}")
 
-    def scrape_multiple_videos(self, video_urls, profile_dir="./persistent_browser_data", enable_comment=False, max_tabs=5):
+    def scrape_multiple_videos(self, video_urls, profile_dir="./browser_profile", enable_comment=False, max_tabs=5):
         """
         Scrape multiple video URLs by opening them in multiple tabs first, then loop back to crawl details.
         This improves performance by parallelizing page loads.
@@ -303,32 +304,42 @@ class TikTokVideoDetailScraper:
             print("No video URLs provided")
             return
 
-        driver = self.setup_browser(profile_dir=profile_dir, load_previous_session=True)
+        driver = self.setup_browser(
+            profile_dir=profile_dir, load_previous_session=True)
         browser = self.browser
         try:
             for i, video_url in enumerate(video_urls):
                 try:
                     # Navigate to each video URL in the same tab
                     browser.open_new_tab(video_url + '?is_from_webapp=1', )
-                    print(f"Processing video {i+1}/{len(video_urls)}: {video_url}")
+                    print(
+                        f"Processing video {i+1}/{len(video_urls)}: {video_url}")
                     time.sleep(2)
                     soup = BeautifulSoup(driver.page_source, "html.parser")
-                    author_container = soup.find("div", class_=lambda x: x and "DivAuthorContainer" in x)
+                    author_container = soup.find(
+                        "div", class_=lambda x: x and "DivAuthorContainer" in x)
                     author_info = {
                         "username": author_container.find("span", class_=lambda x: x and "SpanUniqueId" in x).get_text(strip=True) if author_container else None,
                         "nickname": author_container.find("span", class_=lambda x: x and "SpanNickName" in x).get_text(strip=True) if author_container else None,
                     }
-                    time_posted_container = soup.find("span", attrs={"data-e2e": "browser-nickname"})
-                    time_posted = time_posted_container.find_all("span")[-1].get_text(strip=True) if time_posted_container else None
-                    description_container = soup.find("div", class_=lambda x: x and "DivDescriptionContentContainer" in x)
-                    description = description_container.find("span", attrs={"data-e2e": "new-desc-span"}).get_text(strip=True) if description_container else None
-                    hashtags = [tag.get_text(strip=True) for tag in description_container.find_all("a", attrs={"data-e2e": "search-common-link"})] if description_container else []
-                    music_container = soup.find("h4", attrs={"data-e2e": "browse-music"})
+                    time_posted_container = soup.find(
+                        "span", attrs={"data-e2e": "browser-nickname"})
+                    time_posted = time_posted_container.find_all(
+                        "span")[-1].get_text(strip=True) if time_posted_container else None
+                    description_container = soup.find(
+                        "div", class_=lambda x: x and "DivDescriptionContentContainer" in x)
+                    description = description_container.find("span", attrs={
+                                                             "data-e2e": "new-desc-span"}).get_text(strip=True) if description_container else None
+                    hashtags = [tag.get_text(strip=True) for tag in description_container.find_all(
+                        "a", attrs={"data-e2e": "search-common-link"})] if description_container else []
+                    music_container = soup.find(
+                        "h4", attrs={"data-e2e": "browse-music"})
                     music_info = {
                         "title": music_container.find("div", class_=lambda x: x and "DivMusicText" in x).get_text(strip=True) if music_container else None,
                         "link": music_container.find("a")["href"] if music_container and music_container.find("a") else None
                     }
-                    action_bar_container = soup.find("div", class_=lambda x: x and "DivActionBarWrapper" in x)
+                    action_bar_container = soup.find(
+                        "div", class_=lambda x: x and "DivActionBarWrapper" in x)
                     engagement_info = {
                         "likes": action_bar_container.find("strong", attrs={"data-e2e": "like-count"}).get_text(strip=True) if action_bar_container and action_bar_container.find("strong", attrs={"data-e2e": "like-count"}) else None,
                         "comments": action_bar_container.find("strong", attrs={"data-e2e": "comment-count"}).get_text(strip=True) if action_bar_container and action_bar_container.find("strong", attrs={"data-e2e": "comment-count"}) else None,
@@ -346,15 +357,17 @@ class TikTokVideoDetailScraper:
                     print(f"Successfully processed video details: {video_url}")
 
                     # Extract comments for each video after details
-                   
+
                     if enable_comment == True:
                         print(f"Extracting comments for: {video_url}")
-                        browser.navigate_and_save_cookies(video_url + '?is_from_webapp=1&lang=vi')
+                        browser.navigate_and_save_cookies(
+                            video_url + '?is_from_webapp=1&lang=vi')
                         time.sleep(3.5)
                         comments = self.extract_comments(driver, video_url)
                         if comments:
                             self.save_comments(comments)
-                            print(f"Successfully extracted {len(comments)} comments from {video_url}")
+                            print(
+                                f"Successfully extracted {len(comments)} comments from {video_url}")
                         else:
                             print(f"No comments found for {video_url}")
                     time.sleep(2)
@@ -380,4 +393,3 @@ class TikTokVideoDetailScraper:
             print(f"Error scraping detail page: {e}")
         finally:
             driver.quit()
-

@@ -25,7 +25,8 @@ def scrapper_process():
     Scrapper process.
     """
     craller = TikTokCrawlerMain()
-    craller.run()  # Assuming run method starts the crawling process
+    # Assuming run method starts the crawling process
+    craller.run()
     print("Scrapper process started...")
     # Here you would implement the actual scrapping logic
 
@@ -102,9 +103,9 @@ def sync_data_to_hive_process():
 
 
 def main():
-    # scrapper_process()
-    # clean_data_process()
-    # sentiment_analysis_process()
+    scrapper_process()
+    clean_data_process()
+    sentiment_analysis_process()
     sync_data_to_hive_process()
 
 

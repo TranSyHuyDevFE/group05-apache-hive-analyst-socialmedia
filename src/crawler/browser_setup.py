@@ -277,7 +277,7 @@ class RealBrowser:
 # Example usage:
 if __name__ == "__main__":
     # Create browser instance with persistent profile
-    browser = RealBrowser(profile_dir="./persistent_browser_data")
+    browser = RealBrowser(profile_dir="./browser_profile")
 
     try:
         # Setup browser (will load previous session if available)
