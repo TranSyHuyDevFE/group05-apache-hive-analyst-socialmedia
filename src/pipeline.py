@@ -14,7 +14,11 @@ from data_preprocessing.main_process_comments import MainProcessComments
 from data_preprocessing.main_process_user_details import MainProcessUserDetails
 from data_preprocessing.file_path import FilePaths
 
+from sentiment.main import SentimentProcessing
+import subprocess
 DATA_CRAWLLED_DIRECTORY = "./data/raw_data/tiktok"
+CLEANED_DATA_DIRECTORY = "./data/cleaned_data/"
+
 
 def scrapper_process():
     """
@@ -33,42 +37,38 @@ def clean_data_process():
     main_process_video = MainProcessDetailsVid(
         FilePaths(
             input_path=f"{DATA_CRAWLLED_DIRECTORY}/details_video_info.csv",
-            output_path="./cleaned_data"
+            output_path=f'{CLEANED_DATA_DIRECTORY}/video_info_details'
         )
     )
     main_process_video.run()
     main_process_related_videos = MainProcessRelatedVideos(
         FilePaths(
             input_path=f"{DATA_CRAWLLED_DIRECTORY}/related_videos.csv",
-            output_path="./cleaned_data"
+            output_path=f'{CLEANED_DATA_DIRECTORY}/related_videos'
         )
     )
     main_process_related_videos.run()
     main_process_trend_videos = MainProcessTrendVideos(
         FilePaths(
             input_path=f"{DATA_CRAWLLED_DIRECTORY}/trend_videos.csv",
-            output_path="./cleaned_data"
+            output_path=f'{CLEANED_DATA_DIRECTORY}/video'
         )
     )
     main_process_trend_videos.run()
     main_process_comments = MainProcessComments(
         FilePaths(
             input_path=f"{DATA_CRAWLLED_DIRECTORY}/comments.csv",
-            output_path="./cleaned_data"
+            output_path=f'{CLEANED_DATA_DIRECTORY}/comments'
         )
     )
     main_process_comments.run()
     main_process_user_details = MainProcessUserDetails(
         FilePaths(
             input_path=f"{DATA_CRAWLLED_DIRECTORY}/user_info.csv",
-            output_path="./cleaned_data"
+            output_path=f'{CLEANED_DATA_DIRECTORY}/user_info_details'
         )
     )
     main_process_user_details.run()
-    # Assuming these methods handle the cleaning and saving of data
-    # Here you would implement the actual cleaning logic
-    # For example, you might read the raw data, process it, and save it to a cleaned directory
-    # This is a placeholder for the actual cleaning logic
     print("Clean data process started...")
 
 
@@ -76,24 +76,35 @@ def sentiment_analysis_process():
     """
     Sentiment analysis process.
     """
+    print("Syncing data to Hive process started...")
+    s = SentimentProcessing(
+        input_dir=f"{CLEANED_DATA_DIRECTORY}/comments",
+        output_dir=f"{CLEANED_DATA_DIRECTORY}/comments",
+    )
+    s.run()
     print("Sentiment analysis process started...")
-
-# Sync data qua hive
 
 
 def sync_data_to_hive_process():
     """
     Sync data to Hive process.
     """
-    print("Syncing data to Hive process started...")
-    # Here you would implement the actual sync logic
-    pass
+    try:
+        result = subprocess.run(
+            ["./scripts/excute-run-docker.sh"],
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        print("Sync to Hive output:", result.stdout)
+    except subprocess.CalledProcessError as e:
+        print("Error syncing to Hive:", e.stderr)
 
 
 def main():
-    scrapper_process()
-    clean_data_process()
-    sentiment_analysis_process()
+    # scrapper_process()
+    # clean_data_process()
+    # sentiment_analysis_process()
     sync_data_to_hive_process()
 
 

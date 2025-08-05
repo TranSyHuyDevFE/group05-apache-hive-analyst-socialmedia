@@ -44,11 +44,9 @@ class MainProcessDetailsVid:
         print("Processed data preview:")
         print(processed_data.head())
 
-        # Generate output file name with prefix and date in HCM timezone
-        output_dir = "/workspaces/py_env_research/group05-apache-hive-analyst-socialmedia/cleaned_data"
-        os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(self.paths.output_path, exist_ok=True)
         output_file = FileNameGenerator.generate("video_info_details") + ".csv"
-        output_path = os.path.join(output_dir, output_file)
+        output_path = os.path.join(self.paths.output_path, output_file)
 
         # Save processed data
         self.io_handler.save_csv(processed_data, output_path)
@@ -67,6 +65,3 @@ def main():
     main_process = MainProcessDetailsVid(paths)
     main_process.run()
 
-
-if __name__ == "__main__":
-    main()

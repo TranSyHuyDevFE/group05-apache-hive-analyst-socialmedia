@@ -1,6 +1,7 @@
 import pandas as pd
 import os
-from sentiment import SentimentAnalyzer
+from .sentiment import SentimentAnalyzer
+
 
 class SentimentProcessing:
     def __init__(self, input_dir=".", output_dir=".", text_column="content"):
@@ -25,6 +26,6 @@ class SentimentProcessing:
                 print(df.head())
 
 # if __name__ == "__main__":
-#     # TODO: mark if file is processed , dont do it again, or not 
+#     # TODO: mark if file is processed , dont do it again, or not
 #     main = SentimentProcessing(input_dir="../cleaned_data/comments", output_dir="../cleaned_data/comments")
 #     main.run()

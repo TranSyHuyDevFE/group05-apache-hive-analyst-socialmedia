@@ -17,7 +17,7 @@ for tbl in "${!tbls[@]}"; do
 done
 
 # Step 2: Copy each data file to its folder
-src_dir="cleaned_data"
+src_dir="../data/cleaned_data"
 for tbl in "${!tbls[@]}"; do
   cp -r "$src_dir/$tbl/." "$target_dir_data/$tbl/"
 done

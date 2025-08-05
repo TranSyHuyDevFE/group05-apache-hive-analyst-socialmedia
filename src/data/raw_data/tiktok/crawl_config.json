@@ -3,22 +3,22 @@
         "category_slug": "all",
         "display": "All",
         "total_video_crawlled": 0,
-        "timestamp": "2025-08-05T20:50:10.997257+07:00",
-        "status": "crawling_list_video"
+        "timestamp": "2025-08-05T20:50:45.697459+07:00",
+        "status": "crawled_list_video"
     },
     {
         "category_slug": "singing-and-dancing",
         "display": "Singing & Dancing",
         "total_video_crawlled": 0,
-        "timestamp": "2025-08-05T20:50:10.996965+07:00",
-        "status": "not_started"
+        "timestamp": "2025-08-05T20:51:20.230081+07:00",
+        "status": "crawled_list_video"
     },
     {
         "category_slug": "comedy",
         "display": "Comedy",
         "total_video_crawlled": 0,
-        "timestamp": "2025-08-05T20:50:10.996965+07:00",
-        "status": "not_started"
+        "timestamp": "2025-08-05T20:51:20.230412+07:00",
+        "status": "crawling_list_video"
     },
     {
         "category_slug": "sports",

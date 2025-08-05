@@ -9,3 +9,5 @@ Requests==2.31.0
 loguru
 transformers==4.54.0
 underthesea
+torch
+apache-airflow==3.0.3
