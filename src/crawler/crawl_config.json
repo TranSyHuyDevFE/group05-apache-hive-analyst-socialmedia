@@ -5,12 +5,5 @@
     "total_video_crawlled": 0,
     "timestamp": "2025-07-14T00:00:00+07:00",
     "status": "not_started"
-  },
-  {
-    "category_slug": "singing-and-dancing",
-    "display": "Singing & Dancing",
-    "total_video_crawlled": 0,
-    "timestamp": "2025-07-14T00:00:00+07:00",
-    "status": "not_started"
   }
 ]

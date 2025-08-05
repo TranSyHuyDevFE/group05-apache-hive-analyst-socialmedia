@@ -6,6 +6,8 @@
 3. Chay nhan dien tich cuc tieu cuc
 4. Sync file qua hive
 '''
+import time
+from crawler.scheduler import HourlyScheduler
 from crawler.tiktok_crawller_main import TikTokCrawlerMain
 from data_preprocessing.main_process_details_vid import MainProcessDetailsVid
 from data_preprocessing.main_process_related_videos import MainProcessRelatedVideos
@@ -102,12 +104,31 @@ def sync_data_to_hive_process():
         print("Error syncing to Hive:", e.stderr)
 
 
+def clean_up():
+    """
+    move:    -  data/cleaned_data -> data/cleaned_data_bk_<timestamp> 
+    remove: - data/crawled_data
+    """
+    print("Cleaning up...")
+    subprocess.run(["mv", "-f", CLEANED_DATA_DIRECTORY,
+                   f"data/cleaned_data_bk_{int(time.time())}"])
+    subprocess.run(["rm", "-rf", DATA_CRAWLLED_DIRECTORY])
+    print("Cleanup completed.")
+
+
 def main():
     scrapper_process()
     clean_data_process()
     sentiment_analysis_process()
     sync_data_to_hive_process()
+    clean_up()
 
 
 if __name__ == "__main__":
-    main()
+    scheduler = HourlyScheduler(3600 + 1800, main)
+    scheduler.start()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        scheduler.stop()

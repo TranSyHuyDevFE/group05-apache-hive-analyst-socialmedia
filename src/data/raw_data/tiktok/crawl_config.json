@@ -3,14 +3,14 @@
         "category_slug": "all",
         "display": "All",
         "total_video_crawlled": 0,
-        "timestamp": "2025-08-05T23:05:14.522848+07:00",
+        "timestamp": "2025-08-05T23:29:25.863138+07:00",
         "status": "crawling_details_video"
     },
     {
         "category_slug": "singing-and-dancing",
         "display": "Singing & Dancing",
         "total_video_crawlled": 0,
-        "timestamp": "2025-08-05T23:10:33.477300+07:00",
-        "status": "crawling_details_video"
+        "timestamp": "2025-08-05T23:29:25.862924+07:00",
+        "status": "crawled_list_video"
     }
 ]
