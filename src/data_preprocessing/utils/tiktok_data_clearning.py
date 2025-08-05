@@ -30,7 +30,8 @@ class DataCleaning:
                         if unit in date_str:
                             value = int(date_str.split(unit)[0])
                             dt = datetime.now() - timedelta(**{kwarg: value})
-                            dt = hcm_tz.localize(dt)  # Localize to HCM timezone
+                            # Localize to HCM timezone
+                            dt = hcm_tz.localize(dt)
                             return int(dt.timestamp())
                     raise ValueError("Unsupported relative time format")
 
@@ -69,25 +70,25 @@ class DataCleaning:
             return None
 
 
-if __name__ == "__main__":
-    # Test cases for convert_text_to_number
-    cleaner = DataCleaning()
-    test_values = [
-        {"input": "266.4K", "expected": 266400},
-        {"input": "15.3K", "expected": 15300},
-        {"input": "1M", "expected": 1000000},
-        {"input": "5640", "expected": 5640},
-        {"input": "invalid", "expected": None}
-    ]
+# if __name__ == "__main__":
+#     # Test cases for convert_text_to_number
+#     cleaner = DataCleaning()
+#     test_values = [
+#         {"input": "266.4K", "expected": 266400},
+#         {"input": "15.3K", "expected": 15300},
+#         {"input": "1M", "expected": 1000000},
+#         {"input": "5640", "expected": 5640},
+#         {"input": "invalid", "expected": None}
+#     ]
 
-    print("Testing convert_text_to_number:")
-    for test in test_values:
-        result = cleaner.convert_text_to_number(test["input"])
-        print(
-            f"Input: {test['input']}, Expected: {test['expected']}, Result: {result}")
-        assert result == test["expected"], f"Test failed for input: {test['input']}"
+#     print("Testing convert_text_to_number:")
+#     for test in test_values:
+#         result = cleaner.convert_text_to_number(test["input"])
+#         print(
+#             f"Input: {test['input']}, Expected: {test['expected']}, Result: {result}")
+#         assert result == test["expected"], f"Test failed for input: {test['input']}"
 
-    print("All tests passed!")
+#     print("All tests passed!")
 #     for entry in raw_data:
 #         entry['timestamp'] = cleaner.convert_text_date_to_time_stamp(
 #             entry['date'])

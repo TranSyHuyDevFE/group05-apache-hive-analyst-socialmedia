@@ -1,22 +1,13 @@
 
-from data_reader import DataReader
-from video_details_process import VideoDetailsProcessor
-from utils.file_name import FileNameGenerator
+from .data_reader import DataReader
+from .video_details_process import VideoDetailsProcessor
+from .utils.file_name import FileNameGenerator
 import os
+from .file_path import FilePaths
 
 # Read from ./term/details_video_info.csv
 # proecesss
 # Save to ./term/details_video_info_processed.csv
-
-
-class FilePaths:
-    """
-    Class to encapsulate input and output file paths.
-    """
-
-    def __init__(self, input_path: str, output_path: str):
-        self.input_path = input_path
-        self.output_path = output_path
 
 
 class MainProcessDetailsVid:
@@ -61,7 +52,8 @@ class MainProcessDetailsVid:
 
         # Save processed data
         self.io_handler.save_csv(processed_data, output_path)
-        print(f"Data preprocessing completed successfully. Output saved to: {output_path}")
+        print(
+            f"Data preprocessing completed successfully. Output saved to: {output_path}")
 
 
 def main():

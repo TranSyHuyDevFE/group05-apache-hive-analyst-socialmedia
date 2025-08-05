@@ -1,9 +1,10 @@
 import pandas as pd
 import os
-from utils.file_name import FileNameGenerator
-from utils.tiktok_data_clearning import DataCleaning
+from .utils.file_name import FileNameGenerator
+from .utils.tiktok_data_clearning import DataCleaning
 from datetime import datetime
 import pytz
+
 
 class TrendVideosProcessor:
     @staticmethod
@@ -15,6 +16,7 @@ class TrendVideosProcessor:
     def remove_hashtags(text):
         import re
         return re.sub(r'#[\w]+', '', str(text)).strip()
+
     @staticmethod
     def extract_tiktok_username(url):
         import re
@@ -22,6 +24,7 @@ class TrendVideosProcessor:
         if match:
             return match.group(1)
         return None
+
     def clean_data(self, data: pd.DataFrame) -> pd.DataFrame:
         try:
             # Only drop rows where all values are NaN
@@ -37,10 +40,12 @@ class TrendVideosProcessor:
             # Normalize likes, comments, shares if present
             for col in ['likes', 'comments', 'shares']:
                 if col in data.columns:
-                    data[col] = data[col].apply(lambda x: DataCleaning.convert_text_to_number(x))
+                    data[col] = data[col].apply(
+                        lambda x: DataCleaning.convert_text_to_number(x))
             # Normalize time_published if present
             if 'time_published' in data.columns:
                 hcm_tz = pytz.timezone('Asia/Ho_Chi_Minh')
+
                 def parse_timestamp(val):
                     ts = DataCleaning.convert_text_date_to_time_stamp(val)
                     if ts is None:
@@ -49,10 +54,12 @@ class TrendVideosProcessor:
                         return datetime.fromtimestamp(ts, hcm_tz).strftime('%d-%m-%Y')
                     except Exception:
                         return None
-                data['time_published'] = data['time_published'].apply(parse_timestamp)
+                data['time_published'] = data['time_published'].apply(
+                    parse_timestamp)
             # Extract username from video_url if present
             if 'url' in data.columns:
-                data['username'] = data['url'].apply(self.extract_tiktok_username)
+                data['username'] = data['url'].apply(
+                    self.extract_tiktok_username)
             # Extract hashtags from title and remove them from title
             if 'title' in data.columns:
                 data['hashtags'] = data['title'].apply(self.extract_hashtags)

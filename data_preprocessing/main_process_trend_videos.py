@@ -2,11 +2,8 @@ from trend_videos_process import TrendVideosProcessor
 import pandas as pd
 import os
 from utils.file_name import FileNameGenerator
+from file_path import FilePaths
 
-class FilePaths:
-    def __init__(self, input_path: str, output_path: str = None):
-        self.input_path = input_path
-        self.output_path = output_path
 
 class MainProcessTrendVideos:
     def __init__(self, paths: FilePaths):

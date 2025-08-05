@@ -1,12 +1,9 @@
-from comment_details_process import CommentDetailsProcessor
+from .comment_details_process import CommentDetailsProcessor
 import pandas as pd
 import os
-from utils.file_name import FileNameGenerator
+from .file_path import FilePaths
+from .utils.file_name import FileNameGenerator
 
-class FilePaths:
-    def __init__(self, input_path: str, output_path: str = None):
-        self.input_path = input_path
-        self.output_path = output_path
 
 class MainProcessComments:
     def __init__(self, paths: FilePaths):
@@ -37,7 +34,9 @@ class MainProcessComments:
         output_path = os.path.join(output_dir, output_file)
         # Save processed data
         processed_data.to_csv(output_path, index=False)
-        print(f"Comment data preprocessing completed successfully. Output saved to: {output_path}")
+        print(
+            f"Comment data preprocessing completed successfully. Output saved to: {output_path}")
+
 
 def main():
     paths = FilePaths(
@@ -46,6 +45,7 @@ def main():
     )
     main_process = MainProcessComments(paths)
     main_process.run()
+
 
 if __name__ == "__main__":
     main()

@@ -18,12 +18,12 @@ import time
 
 class TikTokCrawlerIO:
     @staticmethod
-    def build_folder(base_dir='raw_data/tiktok'):
+    def build_folder(base_dir='./data/raw_data/tiktok'):
         hcm_tz = pytz.timezone('Asia/Ho_Chi_Minh')
-        folder_name = datetime.now(hcm_tz).strftime("date_%d_%m_%Y_time_%H")
-        os.makedirs(os.path.join(base_dir, folder_name), exist_ok=True)
-        print(f"Created folder: {folder_name}")
-        return os.path.join(base_dir, folder_name)
+        # folder_name = datetime.now(hcm_tz).strftime("date_%d_%m_%Y_time_%H")
+        # os.makedirs(os.path.join(base_dir, folder_name), exist_ok=True)
+        os.makedirs(os.path.join(base_dir), exist_ok=True)
+        return os.path.join(base_dir)
 
     @staticmethod
     def get_default_config_path():
@@ -241,7 +241,8 @@ class TikTokCrawlerMain:
                 chunks = [video_urls[i:i + 20]
                           for i in range(0, len(video_urls), 20)]
                 for chunk in chunks:
-                    self.detail_scraper.scrape_multiple_videos(chunk, enable_comment=False)
+                    self.detail_scraper.scrape_multiple_videos(
+                        chunk, enable_comment=False)
 
                 crawl_config.update_status(
                     category['category_slug'], ProcessStatus.FINISH)

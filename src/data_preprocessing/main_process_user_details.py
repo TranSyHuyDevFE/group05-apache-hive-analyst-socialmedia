@@ -1,12 +1,9 @@
-from data_reader import DataReader
-from utils.file_name import FileNameGenerator
-from user_details_process import UserDetailsProcessor
+from .data_reader import DataReader
+from .utils.file_name import FileNameGenerator
+from .user_details_process import UserDetailsProcessor
 import os
+from .file_path import FilePaths
 
-class FilePaths:
-    def __init__(self, input_path: str, output_path: str):
-        self.input_path = input_path
-        self.output_path = output_path
 
 class MainProcessUserDetails:
     def __init__(self, paths: FilePaths):

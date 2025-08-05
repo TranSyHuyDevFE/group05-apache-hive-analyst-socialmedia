@@ -1,24 +1,19 @@
-from data_reader import DataReader
-from related_videos_process import RelatedVideosProcessor
-from utils.file_name import FileNameGenerator
+from .data_reader import DataReader
+from .related_videos_process import RelatedVideosProcessor
+from .utils.file_name import FileNameGenerator
 import os
+from .file_path import FilePaths
 
 # Read from ./term/related_videos.csv
 # Process
 # Save to ./cleaned_data/related_videos_processed_<date>.csv
 
-class FilePaths:
-    """
-    Class to encapsulate input and output file paths.
-    """
-    def __init__(self, input_path: str, output_path: str = None):
-        self.input_path = input_path
-        self.output_path = output_path
 
 class MainProcessRelatedVideos:
     """
     Class to encapsulate the main processing logic for related videos.
     """
+
     def __init__(self, paths: FilePaths):
         self.paths = paths
         self.io_handler = DataReader()
@@ -47,7 +42,9 @@ class MainProcessRelatedVideos:
         output_path = os.path.join(output_dir, output_file)
         # Save processed data
         self.io_handler.save_csv(processed_data, output_path)
-        print(f"Data preprocessing completed successfully. Output saved to: {output_path}")
+        print(
+            f"Data preprocessing completed successfully. Output saved to: {output_path}")
+
 
 def main():
     paths = FilePaths(
@@ -56,6 +53,7 @@ def main():
     )
     main_process = MainProcessRelatedVideos(paths)
     main_process.run()
+
 
 if __name__ == "__main__":
     main()

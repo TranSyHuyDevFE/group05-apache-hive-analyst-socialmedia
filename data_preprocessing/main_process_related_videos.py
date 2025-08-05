@@ -2,18 +2,12 @@ from data_reader import DataReader
 from related_videos_process import RelatedVideosProcessor
 from utils.file_name import FileNameGenerator
 import os
+from file_path import FilePaths
 
 # Read from ./term/related_videos.csv
 # Process
 # Save to ./cleaned_data/related_videos_processed_<date>.csv
 
-class FilePaths:
-    """
-    Class to encapsulate input and output file paths.
-    """
-    def __init__(self, input_path: str, output_path: str = None):
-        self.input_path = input_path
-        self.output_path = output_path
 
 class MainProcessRelatedVideos:
     """

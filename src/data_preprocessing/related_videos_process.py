@@ -1,11 +1,13 @@
 import pandas as pd
 import re
-from utils.tiktok_data_clearning import DataCleaning
+from .utils.tiktok_data_clearning import DataCleaning
+
 
 class RelatedVideosProcessor:
     @staticmethod
     def extract_hashtags(text):
         return re.findall(r'#\w+', str(text))
+
     @staticmethod
     def extract_username(video_link):
         match = re.search(r'/@([\w\.]+)/video/', str(video_link))
@@ -33,11 +35,14 @@ class RelatedVideosProcessor:
         try:
             # Normalize likes
             if 'likes' in data.columns:
-                data['likes'] = data['likes'].apply(lambda x: DataCleaning.convert_text_to_number(x))
+                data['likes'] = data['likes'].apply(
+                    lambda x: DataCleaning.convert_text_to_number(x))
             # Extract username and video_id from video_link
             if 'video_link' in data.columns:
-                data['username'] = data['video_link'].apply(self.extract_username)
-                data['video_id'] = data['video_link'].apply(self.extract_video_id)
+                data['username'] = data['video_link'].apply(
+                    self.extract_username)
+                data['video_id'] = data['video_link'].apply(
+                    self.extract_video_id)
             # Extract hashtags from title
             if 'title' in data.columns:
                 data['hashtags'] = data['title'].apply(self.extract_hashtags)
