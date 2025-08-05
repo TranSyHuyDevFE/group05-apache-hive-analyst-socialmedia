@@ -1,0 +1,149 @@
+[
+    {
+        "category_slug": "all",
+        "display": "All",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:42:20.577033+07:00",
+        "status": "crawled_user_info"
+    },
+    {
+        "category_slug": "singing-and-dancing",
+        "display": "Singing & Dancing",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:44:08.035996+07:00",
+        "status": "crawled_user_info"
+    },
+    {
+        "category_slug": "comedy",
+        "display": "Comedy",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:45:57.777422+07:00",
+        "status": "crawled_user_info"
+    },
+    {
+        "category_slug": "sports",
+        "display": "Sports",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:47:45.821189+07:00",
+        "status": "crawled_user_info"
+    },
+    {
+        "category_slug": "anime-and-comics",
+        "display": "Anime & Comics",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:49:32.996114+07:00",
+        "status": "crawled_user_info"
+    },
+    {
+        "category_slug": "relationship",
+        "display": "Relationship",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:51:52.856847+07:00",
+        "status": "crawled_user_info"
+    },
+    {
+        "category_slug": "shows",
+        "display": "Shows",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:53:48.403654+07:00",
+        "status": "crawled_user_info"
+    },
+    {
+        "category_slug": "lipsync",
+        "display": "Lipsync",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:55:43.204394+07:00",
+        "status": "crawled_user_info"
+    },
+    {
+        "category_slug": "daily-life",
+        "display": "Daily Life",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:57:33.016870+07:00",
+        "status": "crawled_user_info"
+    },
+    {
+        "category_slug": "beauty-care",
+        "display": "Beauty Care",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:59:23.898053+07:00",
+        "status": "crawled_user_info"
+    },
+    {
+        "category_slug": "games",
+        "display": "Games",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T16:01:17.239748+07:00",
+        "status": "crawled_user_info"
+    },
+    {
+        "category_slug": "society",
+        "display": "Society",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T16:03:08.510642+07:00",
+        "status": "crawled_user_info"
+    },
+    {
+        "category_slug": "outfit",
+        "display": "Outfit",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T16:05:02.901945+07:00",
+        "status": "crawled_user_info"
+    },
+    {
+        "category_slug": "cars",
+        "display": "Cars",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T16:05:02.902252+07:00",
+        "status": "crawling_user_info"
+    },
+    {
+        "category_slug": "food",
+        "display": "Food",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:36:04.490517+07:00",
+        "status": "crawled_list_video"
+    },
+    {
+        "category_slug": "animals",
+        "display": "Animals",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:36:49.032928+07:00",
+        "status": "crawled_list_video"
+    },
+    {
+        "category_slug": "family",
+        "display": "Family",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:37:33.437638+07:00",
+        "status": "crawled_list_video"
+    },
+    {
+        "category_slug": "drama",
+        "display": "Drama",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:38:17.910299+07:00",
+        "status": "crawled_list_video"
+    },
+    {
+        "category_slug": "fitness-and-health",
+        "display": "Fitness & Health",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:39:02.420682+07:00",
+        "status": "crawled_list_video"
+    },
+    {
+        "category_slug": "education",
+        "display": "Education",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:39:47.235654+07:00",
+        "status": "crawled_list_video"
+    },
+    {
+        "category_slug": "technology",
+        "display": "Technology",
+        "total_video_crawlled": 0,
+        "timestamp": "2025-07-26T15:40:31.776597+07:00",
+        "status": "crawled_list_video"
+    }
+]

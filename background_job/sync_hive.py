@@ -1,1 +1,0 @@
-# Sync data qua hive

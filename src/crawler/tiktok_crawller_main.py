@@ -1,20 +1,19 @@
 # This file to handle TikTok crawling process"
-from calendar import c
-from tiktok_video_related import TikTokVideoRelatedScraper
-from tiktok_video_details import TikTokVideoDetailScraper
-from tiktok_user_info import TikTokUserInfoScraper
-from tiktok_trend_videos import TikTokVideoScraper
+from .tiktok_video_related import TikTokVideoRelatedScraper
+from .tiktok_video_details import TikTokVideoDetailScraper
+from .tiktok_user_info import TikTokUserInfoScraper
+from .tiktok_trend_videos import TikTokVideoScraper
 from datetime import datetime
 import os
 import pytz
 import json
 import pandas as pd
 from enum import Enum
-from compressor import CrawledDataCompressor
-from sync_data_to_git import run_sync_script
+from .compressor import CrawledDataCompressor
+# from sync_data_to_git import run_sync_script
 import time
 
-from scheduler import HourlyScheduler
+# from scheduler import HourlyScheduler
 
 
 class TikTokCrawlerIO:
@@ -247,7 +246,7 @@ class TikTokCrawlerMain:
                 crawl_config.update_status(
                     category['category_slug'], ProcessStatus.FINISH)
         self.compressor.compress_all_folders()
-        run_sync_script()
+        # run_sync_script()
 
 
 def my_task():

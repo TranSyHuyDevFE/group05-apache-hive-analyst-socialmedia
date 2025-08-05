@@ -1,0 +1,9 @@
+undetected_chromedriver
+pandas
+selenium
+bs4
+supervisor
+schedule
+pytz
+Requests==2.31.0
+loguru
