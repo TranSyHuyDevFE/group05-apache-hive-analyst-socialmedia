@@ -84,9 +84,11 @@ services:
       superset run -h 0.0.0.0 -p 8088
       "
   
-  auto-crawler:
-    build: ./background_job
-    container_name: auto-crawler
+  pipeline:
+    build: ./src
+    container_name: pipeline
+    networks:
+      - hive
 networks:
   hive:
     name: hive
