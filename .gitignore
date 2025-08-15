@@ -106,3 +106,5 @@ dmypy.json
 /crawler/raw_data/tiktok/*
 /crawler/group05-apache-hive-analyst-socialmedia/*
 /src/browser_profile
+
+volumes
