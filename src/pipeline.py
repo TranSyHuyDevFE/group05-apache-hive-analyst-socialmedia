@@ -44,13 +44,13 @@ def clean_data_process():
         )
     )
     main_process_video.run()
-    main_process_related_videos = MainProcessRelatedVideos(
-        FilePaths(
-            input_path=f"{DATA_CRAWLLED_DIRECTORY}/related_videos.csv",
-            output_path=f'{CLEANED_DATA_DIRECTORY}/related_videos'
-        )
-    )
-    main_process_related_videos.run()
+    # main_process_related_videos = MainProcessRelatedVideos(
+    #     FilePaths(
+    #         input_path=f"{DATA_CRAWLLED_DIRECTORY}/related_videos.csv",
+    #         output_path=f'{CLEANED_DATA_DIRECTORY}/related_videos'
+    #     )
+    # )
+    # main_process_related_videos.run()
     main_process_trend_videos = MainProcessTrendVideos(
         FilePaths(
             input_path=f"{DATA_CRAWLLED_DIRECTORY}/trend_videos.csv",
@@ -65,13 +65,13 @@ def clean_data_process():
         )
     )
     main_process_comments.run()
-    main_process_user_details = MainProcessUserDetails(
-        FilePaths(
-            input_path=f"{DATA_CRAWLLED_DIRECTORY}/user_info.csv",
-            output_path=f'{CLEANED_DATA_DIRECTORY}/user_info_details'
-        )
-    )
-    main_process_user_details.run()
+    # main_process_user_details = MainProcessUserDetails(
+    #     FilePaths(
+    #         input_path=f"{DATA_CRAWLLED_DIRECTORY}/user_info.csv",
+    #         output_path=f'{CLEANED_DATA_DIRECTORY}/user_info_details'
+    #     )
+    # )
+    # main_process_user_details.run()
     print("Clean data process started...")
 
 
@@ -117,11 +117,11 @@ def clean_up():
 
 
 def main():
+    clean_up()
     scrapper_process()
     clean_data_process()
     sentiment_analysis_process()
     sync_data_to_hive_process()
-    clean_up()
 
 
 if __name__ == "__main__":

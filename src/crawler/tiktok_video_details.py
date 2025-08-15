@@ -13,7 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from .browser_setup import RealBrowser
 from selenium.webdriver.common.action_chains import ActionChains
 import json
-# ?is_from_webapp=1
+# ?is_from_webapp=1&lang=eng
 
 
 class TikTokVideoDetailScraper:
@@ -88,7 +88,7 @@ class TikTokVideoDetailScraper:
         print(f"Appended {len(comments)} comment(s) to {file_path}")
 
     def extract_detail_page_info(self, driver, video_url):
-        video_url = video_url + '?is_from_webapp=1'
+        video_url = video_url + '?is_from_webapp=1&lang=eng'
         driver.get(video_url)
         time.sleep(4)  # Allow time for the page to load
 
@@ -311,7 +311,8 @@ class TikTokVideoDetailScraper:
             for i, video_url in enumerate(video_urls):
                 try:
                     # Navigate to each video URL in the same tab
-                    browser.open_new_tab(video_url + '?is_from_webapp=1', )
+                    browser.open_new_tab(
+                        video_url + '?is_from_webapp=1&lang=eng', )
                     print(
                         f"Processing video {i+1}/{len(video_urls)}: {video_url}")
                     time.sleep(2)
@@ -361,7 +362,7 @@ class TikTokVideoDetailScraper:
                     if enable_comment == True:
                         print(f"Extracting comments for: {video_url}")
                         browser.navigate_and_save_cookies(
-                            video_url + '?is_from_webapp=1&lang=vi')
+                            video_url + '?is_from_webapp=1&lang=eng&lang=vi')
                         time.sleep(3.5)
                         comments = self.extract_comments(driver, video_url)
                         if comments:

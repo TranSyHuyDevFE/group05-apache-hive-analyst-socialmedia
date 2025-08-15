@@ -3,10 +3,14 @@ import json
 import pickle
 import logging
 from datetime import datetime
+import time
+from httpx import options
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+from .proxy_rotate import ProxyRotator
 chrome_path = os.getenv("CHROME_BINARY_PATH", "/usr/bin/google-chrome-stable")
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -22,11 +26,13 @@ class RealBrowser:
         self.session_file = os.path.join(self.profile_dir, "session_info.json")
         os.makedirs(self.profile_dir, exist_ok=True)
         logger.info(f"Browser profile directory: {self.profile_dir}")
+        self.proxy_rotator = ProxyRotator()
 
     def setup_browser(self, load_previous_session=True):
         """Setup browser with enhanced persistence options"""
+        # Set proxy if available from ProxyRotator
         options = uc.ChromeOptions()
-        options.add_argument('--headless')
+        # options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument('--disable-gpu')
@@ -132,7 +138,7 @@ class RealBrowser:
             return False
 
         try:
-            with open(self.cookies_file, 'rb') as f:
+            with open(self.cookeis_file, 'rb') as f:
                 cookies = pickle.load(f)
 
             # Navigate to a page first if URL provided
@@ -206,18 +212,18 @@ class RealBrowser:
                 f"Found session from {session_info.get('timestamp', 'unknown time')}")
 
             # Restore tabs if there were multiple
-            tab_urls = session_info.get('tab_urls', [])
-            if len(tab_urls) > 1:
-                for i, tab_info in enumerate(tab_urls):
-                    if i == 0:
-                        # Navigate first tab
-                        self.driver.get(tab_info['url'])
-                    else:
-                        # Open new tabs
-                        self.open_new_tab(tab_info['url'])
+            # tab_urls = session_info.get('tab_urls', [])
+            # if len(tab_urls) > 1:
+            #     for i, tab_info in enumerate(tab_urls):
+            #         if i == 0:
+            #             # Navigate first tab
+            #             self.driver.get(tab_info['url'])
+            #         else:
+            #             # Open new tabs
+            #             self.open_new_tab(tab_info['url'])
 
-            elif len(tab_urls) == 1:
-                self.driver.get(tab_urls[0]['url'])
+            # elif len(tab_urls) == 1:
+            # self.driver.get(tab_urls[0]['url'])
 
             return True
         except Exception as e:
@@ -232,10 +238,11 @@ class RealBrowser:
 
         try:
             # Load existing cookies first
-            self.load_cookies(url)
 
             # Navigate to the URL
             self.driver.get(url)
+            time.sleep(1)
+            self.load_cookies(url)
             logger.info(f"Navigated to {url}")
 
             # Save cookies after navigation if requested

@@ -15,15 +15,18 @@ class SentimentProcessing:
           Xư ly cot content
           Save result to column 'sentiment'
         '''
-        for filename in os.listdir(self.input_dir):
-            if filename.endswith(".csv"):
-                input_path = os.path.join(self.input_dir, filename)
-                df = pd.read_csv(input_path)
-                analyzer = SentimentAnalyzer()
-                df = analyzer.analyze(df, text_column=self.text_column)
-                df.to_csv(input_path, index=False)
-                print(f"Updated {filename}:")
-                print(df.head())
+        try:
+            for filename in os.listdir(self.input_dir):
+                if filename.endswith(".csv"):
+                    input_path = os.path.join(self.input_dir, filename)
+                    df = pd.read_csv(input_path)
+                    analyzer = SentimentAnalyzer()
+                    df = analyzer.analyze(df, text_column=self.text_column)
+                    df.to_csv(input_path, index=False)
+                    print(f"Updated {filename}:")
+                    print(df.head())
+        except Exception as e:
+            print(f"Error processing {e}")
 
 # if __name__ == "__main__":
 #     # TODO: mark if file is processed , dont do it again, or not

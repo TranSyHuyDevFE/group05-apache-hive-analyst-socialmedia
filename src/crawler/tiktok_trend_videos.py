@@ -408,7 +408,7 @@ class TikTokVideoScraper:
 
     def scrape_videos_by_one_category(self, category: dict, output_callback=None, max_crawled_items=2000):
         """Original single-tab scraping method (kept for backward compatibility)"""
-        url = "https://www.tiktok.com/explore"
+        url = "https://www.tiktok.com/explore?lang=eng"
         driver = self.setup_browser()
         self.all_video_info = []
         try:

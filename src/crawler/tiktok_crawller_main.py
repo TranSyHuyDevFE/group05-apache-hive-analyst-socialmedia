@@ -188,7 +188,7 @@ class TikTokCrawlerMain:
             return []
 
     def run(self):
-        MAX_VIDESO_URL_PER_CATEGORY = 259
+        MAX_VIDESO_URL_PER_CATEGORY = 10
         # Always load config from default path
         target_conf_path = self.io.duplicate_config(
             self.io.get_default_config_path(),  self.io.build_folder())
@@ -237,9 +237,8 @@ class TikTokCrawlerMain:
                     category['category_slug'], ProcessStatus.CRAWLING_DETAILS_VIDEO)
                 video_urls = [video['url'] for video in self.load_trend_videos_crawled_by_category(
                     category['category_slug'])]
-                # Split video_urls into chunks of 10 or fewer items
-                chunks = [video_urls[i:i + 12]
-                          for i in range(0, len(video_urls), 12)]
+                chunks = [video_urls[i:i + 6]
+                          for i in range(0, len(video_urls), 6)]
                 for chunk in chunks:
                     self.detail_scraper.scrape_multiple_videos(
                         chunk, enable_comment=True)

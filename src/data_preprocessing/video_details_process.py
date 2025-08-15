@@ -11,9 +11,11 @@ import ast
 class VideoDetailsProcessor:
     def clean_data(self, data: pd.DataFrame) -> pd.DataFrame:
         try:
-            cleaned_data = data.dropna()
-            cleaned_data = cleaned_data.drop_duplicates()
-            return cleaned_data
+            # cleaned_data = data.dropna()
+            # Drop duplicate rows based on 'video_url' column if it exists
+            if 'video_url' in data.columns:
+                data = data.drop_duplicates(subset=['video_url'])
+            return data
         except Exception as e:
             print(f"Error cleaning data: {e}")
             return data  # Return original data to avoid breaking the pipeline
@@ -78,19 +80,12 @@ class VideoDetailsProcessor:
 
     def normalize(self, data: pd.DataFrame) -> pd.DataFrame:
         try:
-            # Define Asia/Ho_Chi_Minh timezone
-            hcm_tz = pytz.timezone('Asia/Ho_Chi_Minh')
-
             # Normalize date field using convert_text_date_to_time_stamp
             if 'time_published' in data.columns:
                 data['time_published'] = data['time_published'].apply(
                     lambda x: DataCleaning.convert_text_date_to_time_stamp(x)
                 )
                 # Convert timestamp to 'dd-mm-yyyy' format in HCM timezone
-                data['time_published'] = data['time_published'].apply(
-                    lambda x: datetime.fromtimestamp(
-                        x, hcm_tz).strftime('%d-%m-%Y') if x else None
-                )
 
             # Normalize numeric fields using convert_text_to_number
             for field in ['likes', 'comments', 'shares']:
@@ -98,7 +93,6 @@ class VideoDetailsProcessor:
                     data[field] = data[field].apply(
                         lambda x: DataCleaning.convert_text_to_number(x)
                     )
-                    print(f"After normalizing '{field}':", data[field].head())
 
             if 'hashtags' in data.columns:
                 data['hashtags'] = data['hashtags'].apply(
@@ -117,8 +111,6 @@ class VideoDetailsProcessor:
         data = self.normalize(data)
         # Drop duplicate rows based on 'video_url' column if it exists
         if 'video_url' in data.columns:
-            before = len(data)
             data = data.drop_duplicates(subset=['video_url'])
-            after = len(data)
         print("Processing completed.")
         return data
