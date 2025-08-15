@@ -43,21 +43,21 @@ class RealBrowser:
             '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
 
         # Allow multiple tabs and improve performance
-        options.add_argument('--max_old_space_size=4096')
+        # options.add_argument('--max_old_space_size=4096')
         options.add_argument('--disable-background-timer-throttling')
-        options.add_argument('--disable-backgrounding-occluded-windows')
-        options.add_argument('--disable-renderer-backgrounding')
+        # options.add_argument('--disable-backgrounding-occluded-windows')
+        # options.add_argument('--disable-renderer-backgrounding')
 
         # Enhanced persistence settings
         options.add_argument(f'--user-data-dir={self.profile_dir}')
         options.add_argument('--profile-directory=Default')
         # options.add_argument('--restore-last-session')
-        options.add_argument('--disable-session-crashed-bubble')
+        # options.add_argument('--disable-session-crashed-bubble')
         options.add_argument('--disable-infobars')
 
         # Cookie and cache persistence
-        options.add_argument('--aggressive-cache-discard')
-        options.add_argument('--enable-aggressive-domstorage-flushing')
+        # options.add_argument('--aggressive-cache-discard')
+        # options.add_argument('--enable-aggressive-domstorage-flushing')
 
         try:
             self.driver = uc.Chrome(options=options)
