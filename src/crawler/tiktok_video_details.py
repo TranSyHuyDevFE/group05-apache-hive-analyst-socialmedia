@@ -362,7 +362,7 @@ class TikTokVideoDetailScraper:
                     if enable_comment == True:
                         print(f"Extracting comments for: {video_url}")
                         browser.navigate_and_save_cookies(
-                            video_url + '?is_from_webapp=1&lang=eng&lang=vi')
+                            video_url + '?is_from_webapp=1&lang=eng')
                         time.sleep(3.5)
                         comments = self.extract_comments(driver, video_url)
                         if comments:
