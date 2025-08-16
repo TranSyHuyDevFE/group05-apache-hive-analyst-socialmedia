@@ -16,10 +16,9 @@ LOCATION '/opt/hive/data/warehouse/tiktok/category';
 -- Create external table for TikTok comments data with sentiment analysis
 CREATE EXTERNAL TABLE IF NOT EXISTS tiktok_comments (
   username STRING,
-  `timestamp` STRING,
+  content STRING,
   likes INT,
   video_url STRING,
-  content STRING,
   sentiment STRING
 )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
