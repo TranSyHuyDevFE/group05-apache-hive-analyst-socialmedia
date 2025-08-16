@@ -46,3 +46,74 @@ SELECT
   (COALESCE(CAST(likes AS INT), 0) + COALESCE(CAST(comments AS INT), 0) + COALESCE(CAST(shares AS INT), 0)) AS total_engagement
 FROM tiktok_video_info_details
 ORDER BY total_engagement DESC;
+
+-- ===== SENTIMENT ANALYSIS VIEWS FOR DASHBOARD =====
+-- View for trending videos and sentiment analysis by crawl date
+CREATE OR REPLACE VIEW v_daily_trending_analysis AS
+WITH daily_videos AS (
+  SELECT 
+    v.crawl_date,
+    v.video_url,
+    v.username,
+    v.nickname,
+    v.description,
+    v.music_title,
+    COALESCE(CAST(v.likes AS INT), 0) AS video_likes,
+    COALESCE(CAST(v.comments AS INT), 0) AS video_comments,
+    COALESCE(CAST(v.shares AS INT), 0) AS video_shares,
+    (COALESCE(CAST(v.likes AS INT), 0) + 
+     COALESCE(CAST(v.comments AS INT), 0) + 
+     COALESCE(CAST(v.shares AS INT), 0)) AS total_engagement,
+    v.time_published,
+    ROW_NUMBER() OVER (PARTITION BY v.crawl_date ORDER BY (COALESCE(CAST(v.likes AS INT), 0) + COALESCE(CAST(v.comments AS INT), 0) + COALESCE(CAST(v.shares AS INT), 0)) DESC) as rank_by_date
+  FROM tiktok_video_info_details v
+  WHERE v.video_url IS NOT NULL AND v.crawl_date IS NOT NULL
+)
+SELECT 
+  dv.crawl_date,
+  dv.video_url,
+  dv.username,
+  dv.nickname,
+  SUBSTR(dv.description, 1, 100) AS short_description,
+  dv.music_title,
+  dv.video_likes,
+  dv.video_comments,
+  dv.video_shares,
+  dv.total_engagement,
+  dv.rank_by_date,
+  -- Comment sentiment analysis
+  COUNT(c.content) AS total_comments,
+  SUM(CASE WHEN c.sentiment = 'POS' THEN 1 ELSE 0 END) AS positive_comments,
+  SUM(CASE WHEN c.sentiment = 'NEG' THEN 1 ELSE 0 END) AS negative_comments,
+  SUM(CASE WHEN c.sentiment = 'NEU' THEN 1 ELSE 0 END) AS neutral_comments,
+  -- Sentiment percentages
+  ROUND((SUM(CASE WHEN c.sentiment = 'POS' THEN 1 ELSE 0 END) * 100.0 / 
+    NULLIF(COUNT(c.content), 0)), 2) AS positive_pct,
+  ROUND((SUM(CASE WHEN c.sentiment = 'NEG' THEN 1 ELSE 0 END) * 100.0 / 
+    NULLIF(COUNT(c.content), 0)), 2) AS negative_pct,
+  ROUND((SUM(CASE WHEN c.sentiment = 'NEU' THEN 1 ELSE 0 END) * 100.0 / 
+    NULLIF(COUNT(c.content), 0)), 2) AS neutral_pct,
+  -- Engagement metrics
+  SUM(COALESCE(c.likes, 0)) AS total_comment_likes,
+  AVG(COALESCE(c.likes, 0)) AS avg_comment_likes,
+  -- Sentiment score
+  (SUM(CASE WHEN c.sentiment = 'POS' THEN 1 ELSE 0 END) - 
+   SUM(CASE WHEN c.sentiment = 'NEG' THEN 1 ELSE 0 END)) AS sentiment_score
+FROM daily_videos dv
+LEFT JOIN tiktok_comments c ON dv.video_url = c.video_url
+WHERE dv.rank_by_date <= 10  -- Top 10 videos per day
+GROUP BY 
+  dv.crawl_date,
+  dv.video_url,
+  dv.username,
+  dv.nickname,
+  dv.description,
+  dv.music_title,
+  dv.video_likes,
+  dv.video_comments,
+  dv.video_shares,
+  dv.total_engagement,
+  dv.rank_by_date
+ORDER BY 
+  dv.crawl_date DESC,
+  dv.rank_by_date;

@@ -13,13 +13,13 @@ WITH SERDEPROPERTIES (
 STORED AS TEXTFILE
 LOCATION '/opt/hive/data/warehouse/tiktok/category';
 
--- Create external table for TikTok comments data
+-- Create external table for TikTok comments data with sentiment analysis
 CREATE EXTERNAL TABLE IF NOT EXISTS tiktok_comments (
-  user_info STRING,
+  username STRING,
   content STRING,
   likes INT,
-  `timestamp` STRING,
-  video_url STRING
+  video_url STRING,
+  sentiment STRING
 )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
 WITH SERDEPROPERTIES (
@@ -76,7 +76,8 @@ CREATE EXTERNAL TABLE IF NOT EXISTS tiktok_video_info_details (
   music_link STRING,
   likes STRING,
   comments STRING,
-  shares STRING
+  shares STRING,
+  crawl_date STRING
 )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
 WITH SERDEPROPERTIES (
