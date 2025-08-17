@@ -66,8 +66,6 @@ services:
       SUPERSET_LOAD_EXAMPLES: 'yes'
     ports:
       - '8088:8088'
-    # volumes:
-    #   - ./volumes/superset-data:/app/superset_home
     networks:
       - hive
     command: >
@@ -79,14 +77,14 @@ services:
       superset run -h 0.0.0.0 -p 8088
       "
   
-  pipeline:
-    build: ./src
-    container_name: pipeline
-    volumes:
-      - ./src/data:/app/data
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - hive
+  # pipeline:
+  #   build: ./src
+  #   container_name: pipeline
+  #   volumes:
+  #     - ./src/data:/app/data
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   networks:
+  #     - hive
 networks:
   hive:
     name: hive
