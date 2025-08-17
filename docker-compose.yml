@@ -1,4 +1,4 @@
-version: '3.9'
+# version: '3.9'
 services:
   postgres:
     image: postgres
@@ -26,15 +26,12 @@ services:
     environment:
       DB_DRIVER: postgres
       SERVICE_NAME: 'metastore'
-      SERVICE_OPTS: '-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
-                     -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/metastore_db
-                     -Djavax.jdo.option.ConnectionUserName=hive
-                     -Djavax.jdo.option.ConnectionPassword=password'
+      SERVICE_OPTS: '-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/metastore_db -Djavax.jdo.option.ConnectionUserName=hive -Djavax.jdo.option.ConnectionPassword=password'
     ports:
-        - '9083:9083'
+      - '9083:9083'
     volumes:
-        - ./volumes/warehouse:/opt/hive/data/warehouse
-        - ./lib/postgresql.jar:/opt/hive/lib/postgresql.jar
+      - ./volumes/warehouse:/opt/hive/data/warehouse
+      - ./lib/postgresql.jar:/opt/hive/lib/postgresql.jar
     networks:
       - hive
 
@@ -67,15 +64,14 @@ services:
     hostname: superset
     environment:
       SUPERSET_SECRET_KEY: 'your-secret-key-here'
-      # DATABASE_URL: 'postgresql://hive:password@postgres:5432/metastore_db'
       SUPERSET_LOAD_EXAMPLES: 'yes'
     ports:
       - '8088:8088'
-    # volumes:
-    #   - ./volumes/superset-data:/app/superset_home
+    volumes:
+      - ./volumes/superset_data:/app/superset_home
     networks:
       - hive
-    command: >
+    command: |
       bash -c "
       superset db upgrade &&
       pip install pyhive thrift sqlalchemy PyHive thrift_sasl &&
@@ -84,14 +80,14 @@ services:
       superset run -h 0.0.0.0 -p 8088
       "
   
-  pipeline:
-    build: ./src
-    container_name: pipeline
-    volumes:
-      - ./src/data:/app/data
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - hive
+  # pipeline:
+  #   build: ./src
+  #   container_name: pipeline
+  #   volumes:
+  #     - ./src/data:/app/data
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   networks:
+  #     - hive
 networks:
   hive:
     name: hive
