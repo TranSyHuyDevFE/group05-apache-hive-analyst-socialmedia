@@ -1,4 +1,6 @@
+import json
 import os
+from shutil import which
 import time
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -49,24 +51,52 @@ class TikTokVideoScraper:
 
     def get_explore_items(self, driver):
         soup = BeautifulSoup(driver.page_source, "html.parser")
+        print(soup)
+        # Updated to find the new container structure
         explore_items = soup.find_all(
-            "div", class_=lambda x: x and "css-10op4xt-DivContainer-StyledDivContainerV2" in x)
+            "div", class_=lambda x: x and "css-1hw9shp-DivItemContainerV2" in x)
+        with open("tiktok_explore_page.json", "w", encoding="utf-8") as f:
+            json.dump([item.get_text(strip=True)
+                      for item in explore_items], f, ensure_ascii=False, indent=4)
+
+        print(f"Found {len(explore_items)} explore items")
         return explore_items
 
     def extract_video_data(self, item):
+        # Extract video URL from the anchor tag
         video_link = item.find(
-            "a", class_=lambda x: x and "css-1mdo0pl-AVideoContainer" in x)
+            "a", class_=lambda x: x and "css-1v1r9qt-AVideoContainer" in x)
         video_url = video_link['href'] if video_link else None
 
         if video_url and video_url not in self.seen_items:
             self.seen_items.add(video_url)
+
+            # Extract thumbnail and description from img tag
+            img_tag = item.find("img")
+            thumbnail = img_tag.get("src") if img_tag else None
+            description = img_tag.get("alt", "") if img_tag else None
+
+            # Extract likes count from the likes container
+            likes_container = item.find(
+                "div", {"data-e2e": "explore-card-like-container"})
+            likes = None
+            if likes_container:
+                likes_span = likes_container.find("span")
+                likes = likes_span.get_text(strip=True) if likes_span else None
+
+            # Extract username from user info section
+            username_element = item.find(
+                "p", class_=lambda x: x and "css-nk6et2-PUniqueId" in x)
+            username = username_element.get_text(
+                strip=True) if username_element else None
+
             video_data = {
                 "url": video_url,
-                "thumbnail": item.find("img")["src"] if item.find("img") else None,
-                "description": item.find("span", attrs={"style": "box-sizing: border-box; display: block; overflow: hidden;"}).get("alt") if item.find("span", attrs={"style": "box-sizing: border-box; display: block; overflow: hidden;"}) else None,
-                "likes": item.find("div", class_=lambda x: x and "css-qptaao-DivIconText" in x).find("span").get_text(strip=True) if item.find("div", class_=lambda x: x and "css-qptaao-DivIconText" in x) else None
+                "thumbnail": thumbnail,
+                "description": description,
+                "likes": likes,
+                "username": username
             }
-            # video_data["likes"] = DataCleaning.convert_text_to_number(video_data["likes"])
             return video_data
         return None
 
@@ -82,7 +112,7 @@ class TikTokVideoScraper:
         self.all_video_info.clear()  # Clear after saving
 
     def get_categories(self, driver):
-        url = "https://www.tiktok.com/explore"
+        url = "https://www.tiktok.com/explore?lang=eng"
         driver.get(url)
         # Wait for the category list container to be present
         WebDriverWait(driver, 10).until(
@@ -506,11 +536,11 @@ class TikTokVideoScraper:
             driver.quit()
 
 
-if __name__ == "__main__":
-    scraper = TikTokVideoScraper()
+# if __name__ == "__main__":
+    # scraper = TikTokVideoScraper()
     # Use fast multi-tab scraping (new optimized method)
-    scraper.scrape_videos_multi_tab_fast(
-        max_categories=5, max_rounds=30, save_interval=5)
+    # scraper.scrape_videos_multi_tab_fast(
+    #     max_categories=5, max_rounds=30, save_interval=5)
 
     # Or use previous multi-tab method
     # scraper.scrape_videos_multi_tab(max_categories=5)

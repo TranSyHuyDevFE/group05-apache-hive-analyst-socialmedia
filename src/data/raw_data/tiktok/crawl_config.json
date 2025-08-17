@@ -3,43 +3,43 @@
         "category_slug": "singing-and-dancing",
         "display": "Singing & Dancing",
         "total_video_crawlled": 0,
-        "timestamp": "2025-08-16T22:39:32.693821+07:00",
-        "status": "not_started"
+        "timestamp": "2025-08-17T09:25:51.023121+07:00",
+        "status": "crawled_list_video"
     },
     {
         "category_slug": "sports",
         "display": "Sports",
         "total_video_crawlled": 0,
-        "timestamp": "2025-08-16T22:39:45.276122+07:00",
-        "status": "not_started"
+        "timestamp": "2025-08-17T09:25:51.023331+07:00",
+        "status": "crawling_list_video"
     },
     {
         "category_slug": "relationship",
         "display": "Relationship",
         "total_video_crawlled": 0,
-        "timestamp": "2025-08-16T22:39:57.677452+07:00",
-        "status": "not_started"
+        "timestamp": "2025-08-17T09:29:17.593194+07:00",
+        "status": "crawled_list_video"
     },
     {
         "category_slug": "daily-life",
         "display": "Daily Life",
         "total_video_crawlled": 0,
-        "timestamp": "2025-08-16T22:40:10.032157+07:00",
-        "status": "not_started"
+        "timestamp": "2025-08-17T09:29:17.593485+07:00",
+        "status": "crawling_list_video"
     },
     {
         "category_slug": "beauty-care",
         "display": "Beauty Care",
         "total_video_crawlled": 0,
-        "timestamp": "2025-08-16T22:40:22.401769+07:00",
-        "status": "not_started"
+        "timestamp": "2025-08-17T09:32:14.922412+07:00",
+        "status": "crawled_list_video"
     },
     {
         "category_slug": "games",
         "display": "Games",
         "total_video_crawlled": 0,
-        "timestamp": "2025-08-16T22:40:34.806915+07:00",
-        "status": "not_started"
+        "timestamp": "2025-08-17T09:32:14.922612+07:00",
+        "status": "crawling_list_video"
     },
     {
         "category_slug": "society",

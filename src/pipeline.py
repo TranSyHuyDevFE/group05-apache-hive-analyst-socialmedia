@@ -117,11 +117,11 @@ def clean_up():
 
 
 def main():
-    clean_up()
+    # clean_up()
     scrapper_process()
-    clean_data_process()
-    sentiment_analysis_process()
-    sync_data_to_hive_process()
+    # clean_data_process()
+    # sentiment_analysis_process()
+    # sync_data_to_hive_process()
 
 
 if __name__ == "__main__":
