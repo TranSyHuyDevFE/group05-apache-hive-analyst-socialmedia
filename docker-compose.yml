@@ -2,9 +2,7 @@ version: '3.9'
 services:
   postgres:
     image: postgres
-    restart: unless-stopped
     container_name: postgres
-    hostname: postgres
     environment:
       POSTGRES_DB: 'metastore_db'
       POSTGRES_USER: 'hive'
@@ -20,7 +18,6 @@ services:
     image: apache/hive:${HIVE_VERSION}
     depends_on:
       - postgres
-    restart: unless-stopped
     container_name: metastore
     hostname: metastore
     environment:
@@ -42,7 +39,6 @@ services:
     image: apache/hive:${HIVE_VERSION}
     depends_on:
       - metastore
-    restart: unless-stopped
     container_name: hiveserver2
     environment:
       HIVE_SERVER2_THRIFT_PORT: 10000
@@ -62,7 +58,6 @@ services:
     image: apache/superset:latest
     depends_on:
       - postgres
-    restart: unless-stopped
     container_name: superset
     hostname: superset
     environment:
