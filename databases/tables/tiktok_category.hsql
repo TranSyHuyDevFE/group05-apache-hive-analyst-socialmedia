@@ -1,0 +1,14 @@
+-- TikTok category table
+CREATE EXTERNAL TABLE IF NOT EXISTS tiktok_category (
+  index INT,
+  display STRING,
+  slug STRING
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES (
+  "separatorChar" = ",",
+  "quoteChar"     = "\"",
+  "escapeChar"    = "\\"
+)
+STORED AS TEXTFILE
+LOCATION '/opt/hive/data/warehouse/tiktok/category'

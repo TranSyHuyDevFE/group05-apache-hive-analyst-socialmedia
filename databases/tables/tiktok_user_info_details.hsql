@@ -1,0 +1,21 @@
+-- TikTok user info details table
+CREATE EXTERNAL TABLE IF NOT EXISTS tiktok_user_info_details (
+  user_title STRING,
+  user_subtitle STRING,
+  avatar_url STRING,
+  bio STRING,
+  username STRING,
+  `following` STRING,
+  `followers` STRING,
+  `likes` STRING,
+  first_link_url STRING,
+  first_link_text STRING
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES (
+  "separatorChar" = ",",
+  "quoteChar"     = "\"",
+  "escapeChar"    = "\\"
+)
+STORED AS TEXTFILE
+LOCATION '/opt/hive/data/warehouse/tiktok/user_info_details'

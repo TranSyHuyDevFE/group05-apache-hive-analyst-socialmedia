@@ -1,0 +1,16 @@
+-- TikTok comments table
+CREATE EXTERNAL TABLE IF NOT EXISTS tiktok_comments (
+  username STRING,
+  content STRING,
+  likes INT,
+  video_url STRING,
+  sentiment STRING
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES (
+  "separatorChar" = ",",
+  "quoteChar"     = "\"",
+  "escapeChar"    = "\\"
+)
+STORED AS TEXTFILE
+LOCATION '/opt/hive/data/warehouse/tiktok/comments'

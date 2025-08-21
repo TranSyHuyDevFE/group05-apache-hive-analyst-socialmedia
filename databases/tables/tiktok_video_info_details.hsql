@@ -1,0 +1,23 @@
+-- TikTok video info details table
+CREATE EXTERNAL TABLE IF NOT EXISTS tiktok_video_info_details (
+  time_published STRING,
+  description STRING,
+  hashtags STRING,
+  video_url STRING,
+  username STRING,
+  nickname STRING,
+  music_title STRING,
+  music_link STRING,
+  likes STRING,
+  comments STRING,
+  shares STRING,
+  crawl_date STRING
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES (
+  "separatorChar" = ",",
+  "quoteChar"     = "\"",
+  "escapeChar"    = "\\"
+)
+STORED AS TEXTFILE
+LOCATION '/opt/hive/data/warehouse/tiktok/video_info_details'

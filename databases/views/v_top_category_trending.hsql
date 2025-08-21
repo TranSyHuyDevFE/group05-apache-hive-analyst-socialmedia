@@ -1,0 +1,15 @@
+-- View: v_top_category_trending
+CREATE OR REPLACE VIEW v_top_category_trending AS
+SELECT
+  v.category AS category_name,
+  COUNT(DISTINCT v.url) AS video_count,
+  COALESCE(SUM(CAST(d.likes AS BIGINT)), 0) AS total_likes,
+  COALESCE(SUM(CAST(d.comments AS BIGINT)), 0) AS total_comments,
+  COALESCE(SUM(CAST(d.shares AS BIGINT)), 0) AS total_shares,
+  COALESCE(SUM(CAST(d.likes AS BIGINT)), 0) + COALESCE(SUM(CAST(d.comments AS BIGINT)), 0) + COALESCE(SUM(CAST(d.shares AS BIGINT)), 0) AS total_engagement
+FROM tiktok_video_info v
+LEFT JOIN tiktok_video_info_details d
+  ON v.url = d.video_url
+WHERE v.category IS NOT NULL AND v.category != ''
+GROUP BY v.category
+ORDER BY video_count DESC

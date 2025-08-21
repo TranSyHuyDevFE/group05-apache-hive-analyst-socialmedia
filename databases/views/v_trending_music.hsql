@@ -1,0 +1,13 @@
+-- View: v_trending_music
+CREATE OR REPLACE VIEW v_trending_music AS
+SELECT
+  music_title AS track_name,
+  COUNT(DISTINCT video_url) AS usage_count,
+  COALESCE(SUM(CAST(likes AS BIGINT)), 0) AS total_likes,
+  COALESCE(SUM(CAST(comments AS BIGINT)), 0) AS total_comments,
+  COALESCE(SUM(CAST(shares AS BIGINT)), 0) AS total_shares,
+  COALESCE(SUM(CAST(likes AS BIGINT)), 0) + COALESCE(SUM(CAST(comments AS BIGINT)), 0) + COALESCE(SUM(CAST(shares AS BIGINT)), 0) AS total_engagement
+FROM tiktok_video_info_details
+WHERE music_title IS NOT NULL AND music_title != ''
+GROUP BY music_title
+ORDER BY usage_count DESC
