@@ -107,4 +107,4 @@ dmypy.json
 /crawler/group05-apache-hive-analyst-socialmedia/*
 /src/browser_profile
 
-volumes
+volumes/hive_db/*

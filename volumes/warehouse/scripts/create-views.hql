@@ -1,9 +1,24 @@
 CREATE OR REPLACE VIEW v_top_hashtags AS
-SELECT trim(regexp_replace(hashtag, '[\\[\\]\'\"\\s]', '')) as clean_hashtag, COUNT(*) AS count
-FROM tiktok_video_info_details
-LATERAL VIEW explode(split(hashtags, ',')) t AS hashtag
-WHERE hashtag != '' AND hashtag IS NOT NULL
-GROUP BY trim(regexp_replace(hashtag, '[\\[\\]\'\"\\s]', ''));
+WITH cleaned_data AS (
+  SELECT 
+    video_url,
+    regexp_replace(
+      regexp_replace(hashtags, '^\\s*\\[|\\]\\s*$', ''), -- Remove outer brackets if present
+      '["\'\\[\\]]', '' -- Remove any remaining quotes or brackets
+    ) as clean_hashtags
+  FROM tiktok_video_info_details
+  WHERE hashtags IS NOT NULL AND hashtags != ''
+)
+SELECT 
+  trim(hashtag) as clean_hashtag,
+  COUNT(*) AS hashtag_count,
+  COUNT(DISTINCT video_url) as video_count
+FROM cleaned_data
+LATERAL VIEW OUTER explode(split(clean_hashtags, ',')) t AS hashtag
+WHERE trim(hashtag) != ''
+GROUP BY trim(hashtag)
+HAVING hashtag_count > 0
+ORDER BY hashtag_count DESC
 
 CREATE OR REPLACE VIEW v_trending_music AS
 SELECT
